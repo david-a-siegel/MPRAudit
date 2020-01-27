@@ -1,7 +1,17 @@
 # MPRAudit
 Repository for MPRA analysis method "MPRAudit"
 
+## Code To Generate Figures in the Paper
+I've posted code to generate 
+
 ## Functions:
 ### Function "return_counts"
-takes as input several experimental parameters (number of clones, amount of noise, etc), and returns as output RNA counts, DNA counts, and variables proportional to the number of counts of RNA and DNA (which may be useful for normalization).
-Function "deleteDjackknife_variance_T0" calculates the technical variance for a given sequence segment.
+Simulates RNA and DNA counts for a given number of clones.  Takes as input several experimental parameters (number of clones, amount of noise, etc).  Returns as output a list of RNA counts for each clone, a list of DNA counts for each clone, and variables proportional to the total number of counts of RNA and DNA (which may be useful for normalization).
+
+### Function "return_counts_T4T0"
+Simulates RNA and DNA counts for a given number of clones at two time points.
+
+
+### Function "deleteDjackknife_variance_T0"
+Takes as input two array-like objects that represents counts of RNA and DNA (respectively), returns 
+
