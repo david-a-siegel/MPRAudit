@@ -2,7 +2,7 @@
 Repository for MPRA analysis method "MPRAudit"
 
 ## Code To Generate Figures in the Paper
-I've posted code to generate 
+I've posted code to generate the figures in the paper, which you can use as examples for how to run MPRAudit.  In addition to code to simulate sample data, MPRAudit consists of 5 simple functions to produce and return $b^2$:
 
 ## Functions:
 ### Function "return_counts"
