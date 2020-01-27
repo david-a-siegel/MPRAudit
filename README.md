@@ -5,8 +5,10 @@ Repository for MPRA analysis method "MPRAudit"
 I've posted code to generate the figures in the paper, which you can use as examples for how to run MPRAudit.  In addition to code to simulate sample data, MPRAudit consists of 5 simple functions to produce and return b<sup>2</sup>:
 
 1. "deleteDjackknife_variance_T0" returns the technical variance
-2. "ordinary_jackknife_variance" returns the variance of the variance
-3. 
+2. np.var returns the total variance
+3. "ordinary_jackknife_variance" returns the variance of the technical variance
+4. "ordinary_variance_jackknife_variance" returns the variance of the total variance
+5. "uncertainty" takes the above outputs and returns b<sup>2</sup> and var(b<sup>2</sup>)
 
 ## Functions:
 ### Function "return_counts"
