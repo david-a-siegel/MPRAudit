@@ -18,7 +18,7 @@ Estimate var(b<sup>2</sup>):
 
 Then (5) combine the above results and return b<sup>2</sup> and var(b<sup>2</sup>).
 
-This must be tweaked depending on whether MPRAudit is being applied to single sequence fragments, or pairs or groups of sequences.
+This must be tweaked depending on whether MPRAudit is being applied to the variation of individual sequences, pairs of sequences, or groups of sequences.
 
 ## Preparing Data
 MPRAudit expects data of the form [describe, then show vectors or something]
