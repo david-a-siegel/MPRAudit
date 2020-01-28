@@ -27,3 +27,4 @@ MPRAudit expects data of the form [describe, then show vectors or something]
 etc
 
 ## Citation
+David A. Siegel, Olivier Le Tonqueze, Anne Biton, David J. Erle, and Noah Zaitlen, "MPRAudit Quantifies the Fraction of Variance Described by Unknown Features in Massively Parallel Reporter Assays" (2020).
