@@ -5,12 +5,10 @@ Repository for MPRA analysis method "MPRAudit"
 MPRAudit calculates the fraction of variance explained by sequence variation, which we call b<sup>2</sup>.  In addition to code to simulate sample data, at its core MPRAudit consists of 5 functions to produce and return b<sup>2</sup>:
 
 Estimate b<sup>2</sup>:
-
 1. Calculate the technical variance
 2. Calculate the total variance
 
 Estimate var(b<sup>2</sup>):
-
 3. Calculate the variance of the technical variance
 4. Calculate the variance of the total variance
 
