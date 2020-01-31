@@ -1,5 +1,3 @@
-import numpy as np
-
 def deleteDjackknife_variance_T0(RNA_counts, DNA_counts):
     if len(RNA_counts)!=len(DNA_counts):
         print("Error: RNA counts has different length from DNA counts")

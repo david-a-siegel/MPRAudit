@@ -1,5 +1,3 @@
-import numpy as np
-
 def generate_random_seq(length_of_seq,has_TATACAG):
     seq_vals = np.random.randint(0,4,size=length_of_seq)
     seq_string = ''

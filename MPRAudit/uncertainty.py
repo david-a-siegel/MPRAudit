@@ -1,5 +1,3 @@
-import numpy as np
-
 def uncertainty(a,b,da,db):
     da = np.sqrt(da) #I'm inputting the variance, should be std dev.
     db = np.sqrt(db) #I'm inputting the variance, shoudl be std dev.

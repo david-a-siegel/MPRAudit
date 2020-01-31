@@ -1,6 +1,3 @@
-import numpy as np
-import scipy.stats as st
-
 def return_counts(num_clones=100,dna_per_clone=200,A=3,s=0.1,sigma_mu_ratio=30.,K=1.):
     DNA_true = st.poisson.rvs(dna_per_clone,size=num_clones)
     DNA_true[DNA_true==0]=1

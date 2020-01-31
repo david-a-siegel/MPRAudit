@@ -1,5 +1,3 @@
-import numpy as np
-
 def ordinary_variance_jackknife_variance(list_of_values):
     list_of_values = np.array(list_of_values)
     

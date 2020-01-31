@@ -1,5 +1,3 @@
-import numpy as np
-
 def ordinary_jackknife_variance_groups(list_of_values_0,list_of_values_1):
     list_of_values_0 = np.array(list_of_values_0)
     list_of_values_1 = np.array(list_of_values_1)
