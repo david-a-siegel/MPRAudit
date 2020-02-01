@@ -2,7 +2,7 @@ import numpy as np
 import os
 import scipy.stats as st
 import pandas as pd
-
+import argparse
 
 def ratio_function(array1,array2):
     RNA_counts = np.array(array1)
@@ -183,14 +183,16 @@ def MPRAudit_Groups(RNA_counts, DNA_counts, sequence_indicators, group_indicator
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-infile", "--infile", type=str, help="Input filename")
+    parser.add_argument("-outfile", "--outfile",type=str, default="outfile",help="Output filename, outfile by default")
+    parser.add_argument("-ratio","--ratiofunction",type=int,default=1,help="Which ratio function to use, see help file for details")
+    parser.add_argument("-paired","--paired",type=bool,default=False,help="Paired sequences, default = False")
+    parser.add_argument("-sep","--sepstr",type=str,default="\t",help="CSV or txt delimiter, default = \t"
 
-    if len(sys.argv) >= 2:
-        filename = sys.argv[1]
-    else:
-        raise Exception("No file name provided!")
+    data_DF = pd.read_csv(args.infile,sep=args.sepstr,header=None)
 
-    data_DF = pd.read_csv(filename,sep='\t',header=None)
-
+    
 
 
 if __name__ == '__main__':
