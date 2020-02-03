@@ -24,10 +24,34 @@ There are minor variations depending on whether MPRAudit is being applied to the
 MPRAudit reads in data using pandas "read_csv" and assumes there is no header.
 
 For individual sequences, the file should have 3 columns:
+
 RNA_counts,DNA_counts,sequence_indicator
 
+For groups of individual sequences, the file should have 4 columns:
+
+RNA_counts,DNA_counts,sequence_indicator,group_indicator
+
+For pairs of sequences, the file should have 6 columns:
+
+RNA_counts1,DNA_counts1,RNA_counts2,DNA_counts2,sequence_indicator1,sequence_indicator2
+
 Counts can be normalized (not necessarily integer).
-"sequence_indicator"
+
+"sequence_indicator" tells MPRAudit which reads are clones and which reads are distinct sequences.  For instance, if there are two sequences with three clones each, the sequence indicator column might be 1,1,1,2,2,2 or 15,15,15,14.9,14.9,14.9 (the actual values don't matter, MPRAudit looks for whether or not they're distinct or equal).
+
+For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:
+6,7,6,7,1,1
+6,7,6,7,1,1
+6,6,6,8,1,1
+6,6,6,7,1,2
+6,7,6,7,2,2
+6,6,6,8,2,2
+7,7,,,2,
+
+
+[NEED TO BE ABLE TO INCLUDE COLUMNS OF UNEQUAL LENGTHS]
+
+By default, MPRAudit assumes the columns are tab-separated, but CSVs or other delimiters can be used by passing the -sep flag.
 
 ## Code
 etc
