@@ -46,7 +46,7 @@ For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are 
 6,6,6,7,1,2\
 6,7,6,7,2,2\
 6,6,6,8,2,2\
-7,7,,,2,\
+7,7,,,2,
 
 
 [NEED TO BE ABLE TO INCLUDE COLUMNS OF UNEQUAL LENGTHS]
