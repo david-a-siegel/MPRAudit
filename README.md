@@ -18,10 +18,16 @@ Estimate var(b<sup>2</sup>):
 
 Then (5) combine the above results and return b<sup>2</sup> and var(b<sup>2</sup>).
 
-This must be tweaked depending on whether MPRAudit is being applied to the variation of individual sequences, pairs of sequences, or groups of sequences.
+There are minor variations depending on whether MPRAudit is being applied to the variation of individual sequences, pairs of sequences, or groups of sequences.
 
 ## Preparing Data
-MPRAudit expects data of the form [describe, then show vectors or something]
+MPRAudit reads in data using pandas "read_csv" and assumes there is no header.
+
+For individual sequences, the file should have 3 columns:
+RNA_counts,DNA_counts,sequence_indicator
+
+Counts can be normalized (not necessarily integer).
+"sequence_indicator"
 
 ## Code
 etc
