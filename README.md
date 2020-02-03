@@ -40,7 +40,7 @@ Counts can be normalized (not necessarily integer).
 "sequence_indicator" tells MPRAudit which reads are clones and which reads are distinct sequences.  For instance, if there are two sequences with three clones each, the sequence indicator column might be 1,1,1,2,2,2 or 15,15,15,14.9,14.9,14.9 (the actual values don't matter, MPRAudit looks for whether or not they're distinct or equal).
 
 For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:
-6,7,6,7,1,1
+6,7,6,7,1,1\n
 6,7,6,7,1,1
 6,6,6,8,1,1
 6,6,6,7,1,2
