@@ -23,17 +23,11 @@ There are minor variations depending on whether MPRAudit is being applied to the
 ## Preparing Data
 MPRAudit reads in data using pandas "read_csv" and assumes there is no header.
 
-For individual sequences, the file should have 3 columns:
+For individual sequences, the file should have 3 columns: RNA_counts,DNA_counts,sequence_indicator
 
-RNA_counts,DNA_counts,sequence_indicator
+For groups of individual sequences, the file should have 4 columns: RNA_counts,DNA_counts,sequence_indicator,group_indicator
 
-For groups of individual sequences, the file should have 4 columns:
-
-RNA_counts,DNA_counts,sequence_indicator,group_indicator
-
-For pairs of sequences, the file should have 6 columns:
-
-RNA_counts1,DNA_counts1,RNA_counts2,DNA_counts2,sequence_indicator1,sequence_indicator2
+For pairs of sequences, the file should have 6 columns: RNA_counts1,DNA_counts1,RNA_counts2,DNA_counts2,sequence_indicator1,sequence_indicator2
 
 Counts can be normalized (not necessarily integer).
 
