@@ -42,16 +42,27 @@ Counts can be normalized (not necessarily integer).
 For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:\
 6,7,6,7,1,1\
 6,7,6,7,1,1\
-6,6,6,8,1,1\
+6,6,6,9,1,1\
 6,6,6,7,1,2\
 6,7,6,7,2,2\
 6,6,6,8,2,2\
 7,7,,,2,\
 6,6,,,2,
 
-In this case the final rows have missing data because the number of clones differ.  This is fine, but 
+In this case the final rows have missing data because the number of clones differ.  This is fine.  The extra commas must be present for the data to load properly.  But there should be NO missing data in the middle of the file, e.g. this will lead to errors:\
+6,7,6,7,1,1\
+,7,6,7,1,1\
+6,,6,9,1,1\
+6,6,6,7,,2\
+6,7,6,7,2,2\
+6,6,6,8,2,2\
+7,7,,,2,\
+6,6,,,2,
 
-By default, MPRAudit assumes the files are CSVs (comma-separated), but other delimiters can be used by passing the -sep flag.  We don't recommend using white space (tabs/spaces) because columns may be unequal length, but .
+This will cause errors because NaNs are removed after each column is loaded.
+
+
+By default, MPRAudit assumes the files are CSVs (comma-separated), but other delimiters can be used by passing the -sep flag.  We don't recommend using white space (tabs/spaces) because columns may be unequal length and it might be beneficial to be able to observe missing data.
 
 ## Code
 etc
