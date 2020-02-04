@@ -46,12 +46,12 @@ For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are 
 6,6,6,7,1,2\
 6,7,6,7,2,2\
 6,6,6,8,2,2\
-7,7,,,2,
+7,7,,,2,\
+6,6,,,2,
 
+In this case the final rows have missing data because the number of clones differ.  This is fine, but 
 
-[NEED TO BE ABLE TO INCLUDE COLUMNS OF UNEQUAL LENGTHS]
-
-By default, MPRAudit assumes the columns are tab-separated, but CSVs or other delimiters can be used by passing the -sep flag.
+By default, MPRAudit assumes the files are CSVs (comma-separated), but other delimiters can be used by passing the -sep flag.  We don't recommend using white space (tabs/spaces) because columns may be unequal length, but .
 
 ## Code
 etc
