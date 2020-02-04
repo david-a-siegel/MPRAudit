@@ -61,7 +61,7 @@ In this case the final rows have missing data because the number of clones diffe
 7,7,,,2,\
 6,6,,,2,
 
-This will cause errors because NaNs are removed after each column is loaded, so the program will mix up the clone counts like so:\
+This will cause errors because NaNs are removed after each column is loaded, so the program will mix up the clone counts and read it in as:\
 6,7,6,7,1,1\
 6,7,6,7,1,1\
 6,6,6,9,1,1\
