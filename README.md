@@ -101,7 +101,7 @@ There are currently five ratio functions:
 4. RNA/DNA
 5. (RNA+1)/(DNA+1)
 
-Feel free to implement your own by editing "ratio_function" in MPRAudit_Functions.
+Feel free to implement your own by editing "ratio_function" in MPRAudit_Functions and/or contact us with suggestions!
 
 
 ### Example Simulations
