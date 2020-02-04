@@ -66,7 +66,7 @@ This will cause errors because NaNs are removed after each column is loaded, so 
 6,7,6,7,2,2\
 6,6,6,7,2,2\
 7,7,6,8,2,2\
-6,6,,,2,\
+6,6,,,2,
 
 
 By default, MPRAudit assumes the files are CSVs (comma-separated), but other delimiters can be used by passing the -sep flag.  We don't recommend using white space (tabs/spaces) because columns may be unequal length and it might be beneficial to be able to observe missing data.
@@ -90,6 +90,29 @@ The only required input is the input filename.
 * -timepoints is 1 by default
 * -numtrials is 100 by default
 * -jackpow is 0.6 by default
+
+### Ratio Functions
+There are currently five ratio functions:
+1. RNA/(RNA+DNA)
+2. log2(RNA/DNA)
+3. log2((RNA+1)/(DNA+1))
+4. RNA/DNA
+5. (RNA+1)/(DNA+1)
+
+Feel free to implement your own by editing "ratio_function" in MPRAudit_Functions.
+
+
+### Example Simulations
+
+Example simulations can be run as
+
+```
+python Example_Simulation#.py
+```
+
+On a 2014 Mac Mini,\
+Simulation1 returns 7 seconds, b2 ~ 0.51 +/- 0.03\
+Simulation2 returns 14 seconds, b2 ~ 0.88 +/- 0.01
 
 ## Citation
 David A. Siegel, Olivier Le Tonqueze, Anne Biton, David J. Erle, and Noah Zaitlen, "MPRAudit Quantifies the Fraction of Variance Described by Unknown Features in Massively Parallel Reporter Assays" (2020).
