@@ -78,8 +78,17 @@ MPRAudit functions are given in MPRAudit/MPRAudit_Functions.py
 MPRAudit can be run as:
 
 ```
-python test.py
+python MPRAudit.py -infile [input file] -outfile [output file] -ratio [ratio function indicator] -paired [True/False] -sep [delimiter] -timepoints [1 or 2] -numtrials [integer] -jackpow [float between 0 and 1]
 ```
+
+The only required input is the input filename.
+-If no output filename is given MPRAudit prints to standard output using the python "print" function.
+-ratio uses RNA/(RNA+DNA) by default, must be an integer, currently 1-5 (see below for further details)
+-paired is False by default
+-sep is comma "," by default
+-timepoints is 1 by default
+-numtrials is 100 by default
+-jackpow is 0.6 by default
 
 ## Citation
 David A. Siegel, Olivier Le Tonqueze, Anne Biton, David J. Erle, and Noah Zaitlen, "MPRAudit Quantifies the Fraction of Variance Described by Unknown Features in Massively Parallel Reporter Assays" (2020).
