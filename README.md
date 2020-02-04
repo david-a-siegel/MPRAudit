@@ -2,7 +2,7 @@
 Repository for MPRA analysis method "MPRAudit"
 
 ## Overview
-MPRAudit calculates the fraction of variance explained by sequence variation, which we call b<sup>2</sup>.  In addition to code to simulate sample data, at its core MPRAudit consists of 5 functions to produce and return b<sup>2</sup>:
+MPRAudit calculates the fraction of variance explained by sequence variation, which we call b<sup>2</sup>.  At its core MPRAudit consists of 5 functions to produce and return b<sup>2</sup>:
 
 Estimate b<sup>2</sup>:
 
@@ -19,6 +19,8 @@ Estimate var(b<sup>2</sup>):
 Then (5) combine the above results and return b<sup>2</sup> and var(b<sup>2</sup>).
 
 There are minor variations depending on whether MPRAudit is being applied to the variation of individual sequences, pairs of sequences, or groups of sequences.
+
+We also provide code to generate sample data, example scripts, and the python notebook that generated the figures in our manuscript.
 
 ## Preparing Data
 MPRAudit reads in data using pandas "read_csv" and assumes there is no header.
