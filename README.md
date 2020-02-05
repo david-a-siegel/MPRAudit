@@ -43,13 +43,24 @@ Counts can be normalized (not necessarily integer).
 
 For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:\
 6,7,6,7,1,1\
-6,7,6,7,1,1\
-6,6,6,9,1,1\
-6,6,6,7,1,2\
-6,7,6,7,2,2\
-6,6,6,8,2,2\
+2,3,6,8,1,1\
+6,7,6,5,1,1\
+3,4,6,10,1,2\
+6,7,6,15,2,2\
+16,10,6,10,2,2\
 7,7,,,2,\
-6,6,,,2,
+6,6,,,2,\
+
+We saved this small dataset as "ExampleData1.csv".  To run MPRAudit on this data, the command is
+```
+python MPRAudit.py -infile ExampleData1.csv -paired True
+```
+and the output is something like:\
+b2_mean: 0.83\
+b2_std: 0.07\
+
+b<sup>2<\sup> is large 
+
 
 In this case the final rows have missing data because the number of clones differ.  The extra commas must be present for the data to load properly.  But there should be NO missing data in the middle of the file, e.g. this will lead to errors:\
 6,7,6,7,1,1\
@@ -113,8 +124,8 @@ python Example_Simulation#.py
 ```
 
 On a 2014 Mac Mini,\
-Simulation1 returns 7 seconds, b2 ~ 0.51 +/- 0.03\
-Simulation2 returns 14 seconds, b2 ~ 0.88 +/- 0.01
+Simulation1 returns 7 seconds, b2 ~ 0.51, SD ~ 0.03\
+Simulation2 returns 14 seconds, b2 ~ 0.88, SD ~ 0.01
 
 ## Citation
 David A. Siegel, Olivier Le Tonqueze, Anne Biton, David J. Erle, and Noah Zaitlen, "MPRAudit Quantifies the Fraction of Variance Described by Unknown Features in Massively Parallel Reporter Assays" (2020).
