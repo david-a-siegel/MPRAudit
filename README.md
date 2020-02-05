@@ -39,8 +39,6 @@ For pairs of sequences, the file should have 6 columns:
 
 Counts can be normalized (not necessarily integer).
 
-"sequence_indicator" tells MPRAudit which reads are clones and which reads are distinct sequences.  For instance, if there are two sequences with three clones each, the sequence indicator column might be 1,1,1,2,2,2 or 15,15,15,14.9,14.9,14.9 (the actual values don't matter, MPRAudit looks for whether or not they're equal or distinct).
-
 For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:\
 6,7,6,7,1,1\
 2,3,6,8,1,1\
@@ -51,11 +49,13 @@ For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are 
 7,7,,,2,\
 6,6,,,2,
 
+In this case, there are two sets of RNA and DNA data, with two sequences labelled 1 and 2 given in the 5th and 6th columns.  For the first set of RNA and DNA data, sequence 1 has 4 clones and sequence 2 has 4 clones (there are 4 1's and 4 2's in the 5th column).  For the second set of RNA and DNA data, sequence 1 has 3 clones and sequence 2 has 3 clones (there are 3 1's and 3 2's in the 6th column).
+
 We saved this small dataset as "ExampleData1.csv".  To run MPRAudit on this as paired RNA/(RNA+DNA) data, the command is
 ```
 python MPRAudit.py -infile /path/to/ExampleData1.csv -paired True
 ```
-and the output is something like:
+and the output is roughly (results vary due to randomization):
 ```
 b2_mean: 0.83
 b2_std: 0.07
