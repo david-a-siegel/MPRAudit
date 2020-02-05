@@ -59,7 +59,7 @@ and the output is something like:\
 b2_mean: 0.83\
 b2_std: 0.07\
 
-b<sup>2<\sup> is large 
+b<sup>2</sup> is large 
 
 
 In this case the final rows have missing data because the number of clones differ.  The extra commas must be present for the data to load properly.  But there should be NO missing data in the middle of the file, e.g. this will lead to errors:\
