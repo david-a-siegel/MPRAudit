@@ -1,3 +1,8 @@
+import numpy as np
+import os
+import scipy.stats as st
+import pandas as pd
+import random
 
 def ratio_function(array1,array2,flag_value=1):
     RNA_counts = np.array(array1)
@@ -220,7 +225,7 @@ def ordinary_variance_jackknife_variance_Ngroups(list_of_values,group_indicators
 
 
 
-def deleteDjackknife_variance_T0(RNA_counts, DNA_counts, num_trials = 100, exp_pow = 3./5, ratio_flag = 1):
+def deleteDjackknife_variance_T0(RNA_counts, DNA_counts, num_trials = 100, exp_pow = 3./5, ratiofunction = 1):
     if len(RNA_counts)!=len(DNA_counts):
         raise Exception("Error: RNA counts has different length from DNA counts")
     RNA_counts = np.array(RNA_counts)
@@ -234,50 +239,60 @@ def deleteDjackknife_variance_T0(RNA_counts, DNA_counts, num_trials = 100, exp_p
         kept_clones = random.sample(range(len(RNA_counts)),d_kept)
         RNA_counts_i = RNA_counts[kept_clones]
         DNA_counts_i = DNA_counts[kept_clones]
-        x_i.append(ratio_function(RNA_counts_i,DNA_counts_i,ratio_flag))
+        x_i.append(ratio_function(RNA_counts_i,DNA_counts_i,ratiofunction))
     x_i = np.array(x_i)
     jack_var_x = float(d_kept)/d/num_trials*sum((x_i-np.mean(x_i))**2)
     return jack_var_x
 
     
     
-def MPRAudit_Pairs(RNA_counts1, DNA_counts1, RNA_counts2, DNA_counts2, sequence_indicators, numtrials, jackpow, ratio_flag) #sequence_indicator groups clones into otherwise identical sequences
+def MPRAudit_Pairs(RNA_counts1, DNA_counts1, RNA_counts2, DNA_counts2, sequence_indicators1, sequence_indicators2, numtrials, jackpow, ratiofunction): #sequence_indicator groups clones into otherwise identical sequences
     if len(RNA_counts1)!=len(DNA_counts1):
         raise Exception('RNA_counts and DNA_counts must be array-like of the same length')
-    if len(RNA_counts1)!=len(RNA_counts2):
-        raise Exception('RNA_counts1 and RNA_counts2 must be array-like of the same length')
-    if len(RNA_counts1)!=len(DNA_counts2):
+    if len(RNA_counts2)!=len(DNA_counts2):
         raise Exception('RNA_counts and DNA_counts must be array-like of the same length')        
-    if len(sequence_indicators)!=len(RNA_counts):
+    if len(sequence_indicators1)!=len(RNA_counts1):
         raise Exception('sequence_indicators must be array-like of the same length as the counts')
+    if len(sequence_indicators2)!=len(RNA_counts2):
+        raise Exception('sequence_indicators must be array-like of the same length as the counts')
+    
 
     RNA_counts1 = np.array(RNA_counts1)
     DNA_counts1 = np.array(DNA_counts1)
     RNA_counts2 = np.array(RNA_counts2)
     DNA_counts2 = np.array(DNA_counts2)
-    sequence_indicators = np.array(sequence_indicators)
-    
+    sequence_indicators1 = np.array(sequence_indicators1)
+    sequence_indicators2 = np.array(sequence_indicators2)
+    RNA_counts1 = RNA_counts1[~pd.isnull(RNA_counts1)]
+    RNA_counts2 = RNA_counts2[~pd.isnull(RNA_counts2)]
+    DNA_counts1 = DNA_counts1[~pd.isnull(DNA_counts1)]
+    DNA_counts2 = DNA_counts2[~pd.isnull(DNA_counts2)]
+    sequence_indicators1 = sequence_indicators1[~pd.isnull(sequence_indicators1)]
+    sequence_indicators2 = sequence_indicators2[~pd.isnull(sequence_indicators2)]    
     
     jackknife_variance_list = []
     RD_list = []
     
-    for sequence in np.unique(sequence_indicators):
-        RNA_sequence_counts1 = RNA_counts1[sequence_indicators==sequence]
-        DNA_sequence_counts1 = DNA_counts1[sequence_indicators==sequence]    
-        RNA_sequence_counts2 = RNA_counts2[sequence_indicators==sequence]
-        DNA_sequence_counts2 = DNA_counts2[sequence_indicators==sequence]    
-        jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts1, DNA_sequence_counts1,numtrials,jackpow,ratio_flag)+deleteDjackknife_variance_T0(RNA_sequence_counts2, DNA_sequence_counts2,numtrials,jackpow,ratio_flag))
-        RD_list.append(ratio_function(RNA_sequence_counts1,DNA_sequence_counts1,ratio_flag)-ratio_function(RNA_sequence_counts2,DNA_sequence_counts2,ratio_flag))
+    if set(sequence_indicators1)!=set(sequence_indicators2):
+        raise Exception('Sequence indicators must be paired in MPRAudit Paired')
+        
+    for sequence in np.unique(sequence_indicators1):
+        RNA_sequence_counts1 = RNA_counts1[sequence_indicators1==sequence]
+        DNA_sequence_counts1 = DNA_counts1[sequence_indicators1==sequence]    
+        RNA_sequence_counts2 = RNA_counts2[sequence_indicators2==sequence]
+        DNA_sequence_counts2 = DNA_counts2[sequence_indicators2==sequence]    
+        jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts1, DNA_sequence_counts1,numtrials,jackpow,ratiofunction)+deleteDjackknife_variance_T0(RNA_sequence_counts2, DNA_sequence_counts2,numtrials,jackpow,ratiofunction))
+        RD_list.append(ratio_function(RNA_sequence_counts1,DNA_sequence_counts1,ratiofunction)-ratio_function(RNA_sequence_counts2,DNA_sequence_counts2,ratiofunction))
         
     tech_variance = np.mean(jackknife_variance_list)
     total_variance = np.var(RD_list)
     delta_tech = ordinary_jackknife_variance(jackknife_variance_list)
-    delta_var = ordinary_variance_jackknife_variance(RD_list))
+    delta_var = ordinary_variance_jackknife_variance(RD_list)
     b2_mean, b2_var = uncertainty(tech_variance,total_variance,delta_tech,delta_var)
     return b2_mean, np.sqrt(b2_var)
     
     
-def MPRAudit_Groups(RNA_counts, DNA_counts, sequence_indicators, numtrials, jackpow, ratiofunction, group_indicators=None) #sequence_indicator groups clones into otherwise identical sequences
+def MPRAudit_Groups(RNA_counts, DNA_counts, sequence_indicators, numtrials=100, jackpow=3./5, ratiofunction=1, group_indicators=None): #sequence_indicator groups clones into otherwise identical sequences
     if len(RNA_counts)!=len(DNA_counts):
         raise Exception('RNA_counts and DNA_counts must be array-like of the same length')
     if len(sequence_indicators)!=len(RNA_counts):
@@ -285,29 +300,35 @@ def MPRAudit_Groups(RNA_counts, DNA_counts, sequence_indicators, numtrials, jack
     if group_indicators is not None:
         if len(group_indicators)!=len(RNA_counts):
             raise Exception('sequence_indicators must be array-like of the same length as the counts')    
-
+    else: #If no group indicators then no groups -- just make them all one.
+        group_indicators = np.ones(len(RNA_counts))
     RNA_counts = np.array(RNA_counts)
     DNA_counts = np.array(DNA_counts)
     sequence_indicators = np.array(sequence_indicators)
     group_indicators = np.array(group_indicators)
-    #Check lengths?
     
     tech_variance = 0
     total_variance = 0
+    group_ordered_list = []
+    
     for group in np.unique(group_indicators):
         jackknife_variance_list = []
         RD_list = []
         for sequence in np.unique(sequence_indicators):
             RNA_sequence_counts = RNA_counts[(sequence_indicators==sequence)&(group_indicators==group)]
             DNA_sequence_counts = DNA_counts[(sequence_indicators==sequence)&(group_indicators==group)]
-            jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts, DNA_sequence_counts,numtrials,jackpow,ratio_flag))
-            RD_list.append(ratio_function(RNA_sequence_counts,DNA_sequence_counts,ratio_flag))
+            jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts, DNA_sequence_counts,numtrials,jackpow,ratiofunction))
+            RD_list.append(ratio_function(RNA_sequence_counts,DNA_sequence_counts,ratiofunction))
+            if len(RD_list)>0:
+                group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
         tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
         total_variance += np.var(RD_list)*len(RD_list)
-    tech_variance = tech_variance/len(RNA_counts)
-    total_variance = total_variance/len(RNA_counts)
-    delta_tech = ordinary_jackknife_variance_Ngroups(jackknife_variance_list,group_indicators)
-    delta_var = ordinary_variance_jackknife_variance_Ngroups(RD_list,group_indicators)
+
+    tech_variance = tech_variance/len(group_ordered_list) #Divide by total number of sequences
+    total_variance = total_variance/len(group_ordered_list)
+    delta_tech = ordinary_jackknife_variance_Ngroups(jackknife_variance_list,np.array(group_ordered_list))
+    delta_var = ordinary_variance_jackknife_variance_Ngroups(RD_list,np.array(group_ordered_list))
+
     b2_mean, b2_var = uncertainty(tech_variance,total_variance,delta_tech,delta_var)
     return b2_mean, np.sqrt(b2_var)
     
@@ -319,12 +340,12 @@ def MPRAudit_function(data_DF,ratiofunction=1,paired=False,timepoints=1,numtrial
             if data_DF.shape[1]==3:
                 b2_mean,b2_std = MPRAudit_Groups(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction) #No groups, just single sequences
             elif data_DF.shape[1]==4:    
-                b2_mean,b2_std = MPRAudit_Groups(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction) #Groups
+                b2_mean,b2_std = MPRAudit_Groups(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],group_indicators = data_DF.iloc[:,3],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction) #Groups
             else:
                 raise Exception('Input file should have 3 or 4 columns for this set of parameters')
         elif paired==True: #Not single sequences, difference between sequences
-            if data_DF.shape[1]==5:
-                b2_mean,b2_std = MPRAudit_Pairs(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
+            if data_DF.shape[1]==6:
+                b2_mean,b2_std = MPRAudit_Pairs(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
             else:
                 raise Exception('Input file should have 5 columns for this set of parameters')
 
