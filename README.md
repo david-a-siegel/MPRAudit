@@ -55,9 +55,9 @@ We saved this small dataset as "ExampleData1.csv".  To run MPRAudit on this as p
 ```
 python MPRAudit.py -infile /path/to/ExampleData1.csv -paired True
 ```
-and the output is something like:\
+and the output is something like:
 ```
-b2_mean: 0.83\
+b2_mean: 0.83
 b2_std: 0.07
 ```
 
@@ -72,7 +72,7 @@ In this case the final rows have missing data because the number of clones diffe
 6,7,6,10,2,2\
 16,10,6,15,2,2\
 7,7,6,10,2,2\
-6,6,,,2,\
+6,6,,,2,
 
 
 
