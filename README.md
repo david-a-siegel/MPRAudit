@@ -22,8 +22,6 @@ There are minor variations depending on whether MPRAudit is being applied to the
 
 We also provide code to generate sample data, example scripts, and the python notebook that generated the figures in our manuscript.
 
-## Installation
-Just download the 
 
 ## Preparing Data
 MPRAudit reads in data using pandas "read_csv" and assumes there is no header.
