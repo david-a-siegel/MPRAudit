@@ -16,7 +16,7 @@ Estimate var(b<sup>2</sup>):
 
 4. Calculate the variance of the total variance
 
-Then (5) combine the above results to return b<sup>2</sup> and SD(b<sup>2</sup>) (we return the standard deviation rather than the variance since this is what most people care about in practice).
+Then (5) combine the above results to return b<sup>2</sup> and SD(b<sup>2</sup>).  We return the standard deviation rather than the variance because this is what most people care about in practice.
 
 There are minor variations depending on whether MPRAudit is being applied to the variation of individual sequences, pairs of sequences, or groups of sequences.
 
