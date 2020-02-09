@@ -121,7 +121,8 @@ python Example_Simulation#.py
 
 On a 2014 Mac Mini,\
 Simulation1 returns 7 seconds, b2 ~ 0.51, SD ~ 0.03\
-Simulation2 returns 14 seconds, b2 ~ 0.88, SD ~ 0.01
+Simulation2 returns 14 seconds, b2 ~ 0.88, SD ~ 0.01\
+Simulation3 returns 13 seconds, b2 ~ 0.35, SD ~ 0.04
 
 ## Citation
 David A. Siegel, Olivier Le Tonqueze, Anne Biton, David J. Erle, and Noah Zaitlen, "MPRAudit Quantifies the Fraction of Variance Described by Unknown Features in Massively Parallel Reporter Assays" (2020).
