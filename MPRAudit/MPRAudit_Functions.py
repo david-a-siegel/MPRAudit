@@ -293,6 +293,66 @@ def deleteDjackknife_variance_T4T0(RNA_counts_T0, DNA_counts_T0, RNA_counts_T4, 
     jack_var_x = float(d_kept_T0 if d_T0>d_T4 else d_kept_T4)/max(d_T0,d_T4)/num_trials*sum((x_i-np.mean(x_i))**2)
     return jack_var_x
 
+def deleteDjackknife_variance_CRISPR(RNA_counts,numtrials=100,jackpow=3./5,logflag=True):
+    RNA_counts = np.array(RNA_counts)
+
+    d = int(len(RNA_counts)**(exp_pow))
+    d_kept = len(RNA_counts) - d #This is n-d
+    
+    x_i = []
+    for i in range(num_trials):
+        kept_clones = random.sample(range(len(RNA_counts)),d_kept)
+        RNA_counts_i = RNA_counts[kept_clones]
+        if logflag==True:
+            x_i.append(np.log2(sum(RNA_counts_i+1)))
+        else:
+            x_i.append(sum(RNA_counts_i))
+    x_i = np.array(x_i)
+    jack_var_x = float(d_kept)/d/num_trials*sum((x_i-np.mean(x_i))**2)
+    return jack_var_x
+
+
+
+
+def MPRAudit_CRISPR(RNA_counts, sequence_indicators, numtrials=100, jackpow=3./5, logflag=True, group_indicators=None): #sequence_indicator groups clones into otherwise identical sequences
+    if len(sequence_indicators)!=len(RNA_counts):
+        raise Exception('sequence_indicators must be array-like of the same length as the counts')
+    if group_indicators is not None:
+        if len(group_indicators)!=len(RNA_counts):
+            raise Exception('sequence_indicators must be array-like of the same length as the counts')    
+    else: #If no group indicators then no groups -- just make them all one.
+        group_indicators = np.ones(len(RNA_counts))
+    RNA_counts = np.array(RNA_counts)
+    sequence_indicators = np.array(sequence_indicators)
+    group_indicators = np.array(group_indicators)
+    
+    tech_variance = 0
+    total_variance = 0
+    group_ordered_list = []
+    
+    for group in np.unique(group_indicators):
+        jackknife_variance_list = []
+        RD_list = []
+        for sequence in np.unique(sequence_indicators):
+            RNA_sequence_counts = RNA_counts[(sequence_indicators==sequence)&(group_indicators==group)]
+            jackknife_variance_list.append(deleteDjackknife_variance_CRISPR(RNA_sequence_counts,numtrials,jackpow,logflag))
+            if logflag==True:
+                RD_list.append(np.log2(sum(RNA_sequence_counts+1)))
+            else:
+                RD_list.append(sum(RNA_sequence_counts))
+            if len(RD_list)>0:
+                group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
+        tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
+        total_variance += np.var(RD_list)*len(RD_list)
+
+    tech_variance = tech_variance/len(group_ordered_list) #Divide by total number of sequences
+    total_variance = total_variance/len(group_ordered_list)
+    delta_tech = ordinary_jackknife_variance_Ngroups(jackknife_variance_list,np.array(group_ordered_list))
+    delta_var = ordinary_variance_jackknife_variance_Ngroups(RD_list,np.array(group_ordered_list))
+
+    b2_mean, b2_var = uncertainty(tech_variance,total_variance,delta_tech,delta_var)
+    return b2_mean, np.sqrt(b2_var)
+
     
     
 def MPRAudit_Pairs(RNA_counts1, DNA_counts1, RNA_counts2, DNA_counts2, sequence_indicators1, sequence_indicators2, numtrials, jackpow, ratiofunction): #sequence_indicator groups clones into otherwise identical sequences
@@ -515,26 +575,30 @@ def MPRAudit_Groups_T4T0(RNA_counts_T0, DNA_counts_T0, RNA_counts_T4, DNA_counts
     
     
 
-def MPRAudit_function(data_DF,ratiofunction=1,paired=False,timepoints=1,numtrials=100,jackpow=3./5):
-
-    if timepoints==1:
-        if paired==False:
-            if data_DF.shape[1]==3:
-                b2_mean,b2_std = MPRAudit_Groups(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction) #No groups, just single sequences
-            elif data_DF.shape[1]==4:    
-                b2_mean,b2_std = MPRAudit_Groups(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],group_indicators = data_DF.iloc[:,3],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction) #Groups
-            else:
-                raise Exception('Input file should have 3 or 4 columns for this set of parameters')
-        elif paired==True: #Not single sequences, difference between sequences
-            if data_DF.shape[1]==6:
-                b2_mean,b2_std = MPRAudit_Pairs(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
-            else:
-                raise Exception('Input file should have 6 columns for this set of parameters')
-    elif timepoints==2:
-        if paired==False:
-            if data_DF.shape[1]==6: #RNA_T0, DNA_T0, RNA_T4, DNA_T4, sequence_indicators_T0, sequence_indicators_T4
-                b2_mean,b2_std = MPRAudit_Groups_T4T0(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
-            else:
-                raise Exception('Input file should have 6 columns for this set of parameters')
+def MPRAudit_function(data_DF,ratiofunction=1,paired=False,timepoints=1,numtrials=100,jackpow=3./5,CRISPR_log_flag=None):
+    if CRISPR_log_flag is None:
+        if timepoints==1:
+            if paired==False:
+                if data_DF.shape[1]==3:
+                    b2_mean,b2_std = MPRAudit_Groups(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction) #No groups, just single sequences
+                elif data_DF.shape[1]==4:    
+                    b2_mean,b2_std = MPRAudit_Groups(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],group_indicators = data_DF.iloc[:,3],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction) #Groups
+                else:
+                    raise Exception('Input file should have 3 or 4 columns for this set of parameters')
+            elif paired==True: #Not single sequences, difference between sequences
+                if data_DF.shape[1]==6:
+                    b2_mean,b2_std = MPRAudit_Pairs(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
+                else:
+                    raise Exception('Input file should have 6 columns for this set of parameters')
+        elif timepoints==2:
+            if paired==False:
+                if data_DF.shape[1]==6: #RNA_T0, DNA_T0, RNA_T4, DNA_T4, sequence_indicators_T0, sequence_indicators_T4
+                    b2_mean,b2_std = MPRAudit_Groups_T4T0(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
+                else:
+                    raise Exception('Input file should have 6 columns for this set of parameters')
+    elif type(CRISPR_flag)==bool:
+        b2_mean,b2_std = MPRAudit_CRISPR(data_DF.iloc[:,0],data_DF.iloc[:,1],numtrials=numtrials,jackpow=jackpow,logflag=CRISPR_log_flag) #No groups, just single sequences
+    else:
+        raise Exception('CRISPR_log_flag must be True or False')
                 
     return b2_mean, b2_std    
