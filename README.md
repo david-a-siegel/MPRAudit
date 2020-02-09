@@ -127,4 +127,7 @@ Simulation2 returns 14 seconds, b2 ~ 0.88, SD ~ 0.01
 David A. Siegel, Olivier Le Tonqueze, Anne Biton, David J. Erle, and Noah Zaitlen, "MPRAudit Quantifies the Fraction of Variance Described by Unknown Features in Massively Parallel Reporter Assays" (2020).
 
 ## Contact
-David[dot]Siegel[at]ucsf[d0t]edu, please put "MPRAudit" in the subject line
+David [dot] Siegel [at] ucsf [d0t] edu, please put "MPRAudit" in the subject line
+
+## Thanks
+DAS would like to thank Christa Caggiano for help with this Github
