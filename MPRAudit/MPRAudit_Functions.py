@@ -4,21 +4,41 @@ import scipy.stats as st
 import pandas as pd
 import random
 
-def ratio_function(array1,array2,flag_value=1):
-    RNA_counts = np.array(array1)
-    DNA_counts = np.array(array2)
-    if len(RNA_counts)!=len(DNA_counts):
+def ratio_function(array1,array2,array3=None,array4=None,flag_value=1):
+    RNA_counts_T0 = np.array(array1)
+    DNA_counts_T0 = np.array(array2)
+    if array3 is not None:
+        RNA_counts_T4 = np.array(array3)
+    if array4 is not None:
+        DNA_counts_T4 = np.array(array4)
+
+    if len(RNA_counts_T0)!=len(DNA_counts_T0):
         raise Exception('RNA_counts and DNA_counts must be array-like of the same length')
+
+
     if flag_value==1:
-        return float(sum(RNA_counts))/(sum(RNA_counts)+sum(DNA_counts))
+        return float(sum(RNA_counts_T0))/(sum(RNA_counts_T0)+sum(DNA_counts_T0))
     elif flag_value==2:
-        return np.log2(float(sum(RNA_counts))/sum(DNA_counts))
+        return np.log2(float(sum(RNA_counts_T0))/sum(DNA_counts_T0))
     elif flag_value==3:
-        return np.log2(float(sum(RNA_counts)+1)/(sum(DNA_counts)+1))
+        return np.log2(float(sum(RNA_counts_T0)+1)/(sum(DNA_counts_T0)+1))
     elif flag_value==4:
-        return float(sum(RNA_counts))/sum(DNA_counts)
+        return float(sum(RNA_counts_T0))/sum(DNA_counts_T0)
     elif flag_value==5:
-        return (float(sum(RNA_counts)+1))/(sum(DNA_counts)+1)
+        return (float(sum(RNA_counts_T0)+1))/(sum(DNA_counts_T0)+1)
+    elif flag_value==11:
+        T0 = float(sum(RNA_counts_T0))/(sum(RNA_counts_T0)+sum(DNA_counts_T0))
+        T4 = float(sum(RNA_counts_T4))/(sum(RNA_counts_T4)+sum(DNA_counts_T4))
+        return T4/(T4+T0)
+    elif flag_value==12:
+        T0 = np.log2(float(sum(RNA_counts_T0))/sum(DNA_counts_T0))
+        T4 = np.log2(float(sum(RNA_counts_T4))/sum(DNA_counts_T4))
+        return T4/T0
+    elif flag_value==13:
+        T0 = np.log2(float(sum(RNA_counts_T0)+1)/(sum(DNA_counts_T0)+1))
+        T4 = np.log2(float(sum(RNA_counts_T4)+1)/(sum(DNA_counts_T4)+1))
+        return T4/T0
+    #etc
     else:
         raise Exception('ratio function must have a flag')
 
@@ -239,9 +259,38 @@ def deleteDjackknife_variance_T0(RNA_counts, DNA_counts, num_trials = 100, exp_p
         kept_clones = random.sample(range(len(RNA_counts)),d_kept)
         RNA_counts_i = RNA_counts[kept_clones]
         DNA_counts_i = DNA_counts[kept_clones]
-        x_i.append(ratio_function(RNA_counts_i,DNA_counts_i,ratiofunction))
+        x_i.append(ratio_function(RNA_counts_i,DNA_counts_i,flag_value=ratiofunction))
     x_i = np.array(x_i)
     jack_var_x = float(d_kept)/d/num_trials*sum((x_i-np.mean(x_i))**2)
+    return jack_var_x
+
+
+def deleteDjackknife_variance_T4T0(RNA_counts_T0, DNA_counts_T0, RNA_counts_T4, DNA_counts_T4, num_trials = 100, exp_pow = 3./5, ratiofunction = 1):
+    if len(RNA_counts_T0)!=len(DNA_counts_T0):
+        raise Exception("Error: RNA counts has different length from DNA counts")
+    if len(RNA_counts_T4)!=len(DNA_counts_T4):
+        raise Exception("Error: RNA counts has different length from DNA counts")
+    RNA_counts_T0 = np.array(RNA_counts_T0)
+    DNA_counts_T0 = np.array(DNA_counts_T0)
+    RNA_counts_T4 = np.array(RNA_counts_T4)
+    DNA_counts_T4 = np.array(DNA_counts_T4)
+
+    d_T0 = int(len(RNA_counts_T0)**(exp_pow))
+    d_T4 = int(len(RNA_counts_T4)**(exp_pow))
+    d_kept_T0 = len(RNA_counts_T0) - d_T0 #This is n-d
+    d_kept_T4 = len(RNA_counts_T4) - d_T4
+    
+    x_i = []
+    for i in range(num_trials):
+        kept_clones_T0 = random.sample(range(len(RNA_counts_T0)),d_kept_T0)
+        kept_clones_T4 = random.sample(range(len(RNA_counts_T4)),d_kept_T4)
+        RNA_counts_T0_i = RNA_counts_T0[kept_clones_T0]
+        DNA_counts_T0_i = DNA_counts_T0[kept_clones_T0]
+        RNA_counts_T4_i = RNA_counts_T4[kept_clones_T4]
+        DNA_counts_T4_i = DNA_counts_T4[kept_clones_T4]
+        x_i.append(ratio_function(array1 = RNA_counts_T0_i,array2 = DNA_counts_T0_i,array3 = RNA_counts_T4_i,array4 = DNA_counts_T4_i,flag_value = ratiofunction))
+    x_i = np.array(x_i)
+    jack_var_x = float(d_kept_T0 if d_T0>d_T4 else d_kept_T4)/max(d_T0,d_T4)/num_trials*sum((x_i-np.mean(x_i))**2)
     return jack_var_x
 
     
@@ -282,7 +331,7 @@ def MPRAudit_Pairs(RNA_counts1, DNA_counts1, RNA_counts2, DNA_counts2, sequence_
         RNA_sequence_counts2 = RNA_counts2[sequence_indicators2==sequence]
         DNA_sequence_counts2 = DNA_counts2[sequence_indicators2==sequence]    
         jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts1, DNA_sequence_counts1,numtrials,jackpow,ratiofunction)+deleteDjackknife_variance_T0(RNA_sequence_counts2, DNA_sequence_counts2,numtrials,jackpow,ratiofunction))
-        RD_list.append(ratio_function(RNA_sequence_counts1,DNA_sequence_counts1,ratiofunction)-ratio_function(RNA_sequence_counts2,DNA_sequence_counts2,ratiofunction))
+        RD_list.append(ratio_function(RNA_sequence_counts1,DNA_sequence_counts1,flag_value = ratiofunction)-ratio_function(RNA_sequence_counts2,DNA_sequence_counts2,flag_value = ratiofunction))
         
     tech_variance = np.mean(jackknife_variance_list)
     total_variance = np.var(RD_list)
@@ -318,7 +367,7 @@ def MPRAudit_Groups(RNA_counts, DNA_counts, sequence_indicators, numtrials=100, 
             RNA_sequence_counts = RNA_counts[(sequence_indicators==sequence)&(group_indicators==group)]
             DNA_sequence_counts = DNA_counts[(sequence_indicators==sequence)&(group_indicators==group)]
             jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts, DNA_sequence_counts,numtrials,jackpow,ratiofunction))
-            RD_list.append(ratio_function(RNA_sequence_counts,DNA_sequence_counts,ratiofunction))
+            RD_list.append(ratio_function(RNA_sequence_counts,DNA_sequence_counts,flag_value = ratiofunction))
             if len(RD_list)>0:
                 group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
         tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
@@ -331,6 +380,139 @@ def MPRAudit_Groups(RNA_counts, DNA_counts, sequence_indicators, numtrials=100, 
 
     b2_mean, b2_var = uncertainty(tech_variance,total_variance,delta_tech,delta_var)
     return b2_mean, np.sqrt(b2_var)
+
+
+def MPRAudit_Pairs_T4T0(RNA_counts1_T0, DNA_counts1_T0, RNA_counts1_T4, DNA_counts1_T4, RNA_counts2_T0, DNA_counts2_T0, RNA_counts2_T4, DNA_counts2_T4, sequence_indicators1_T0, sequence_indicators1_T4, sequence_indicators2_T0, sequence_indicators2_T4, numtrials, jackpow, ratiofunction): #sequence_indicator groups clones into otherwise identical sequences
+
+    RNA_counts1_T0 = np.array(RNA_counts1_T0)
+    DNA_counts1_T0 = np.array(DNA_counts1_T0)
+    RNA_counts1_T4 = np.array(RNA_counts1_T4)
+    DNA_counts1_T4 = np.array(DNA_counts1_T4)
+    RNA_counts2_T0 = np.array(RNA_counts2_T0)
+    DNA_counts2_T0 = np.array(DNA_counts2_T0)
+    RNA_counts2_T4 = np.array(RNA_counts2_T4)
+    DNA_counts2_T4 = np.array(DNA_counts2_T4)
+    sequence_indicators1_T0 = np.array(sequence_indicators1_T0)
+    sequence_indicators1_T4 = np.array(sequence_indicators1_T4)
+    sequence_indicators2_T0 = np.array(sequence_indicators2_T0)
+    sequence_indicators2_T4 = np.array(sequence_indicators2_T4)
+    RNA_counts1_T0 = RNA_counts1_T0[~pd.isnull(RNA_counts1_T0)]
+    RNA_counts2_T0 = RNA_counts2_T0[~pd.isnull(RNA_counts2_T0)]
+    RNA_counts1_T4 = RNA_counts1_T4[~pd.isnull(RNA_counts1_T4)]
+    RNA_counts2_T4 = RNA_counts2_T4[~pd.isnull(RNA_counts2_T4)]
+    DNA_counts1_T0 = DNA_counts1_T0[~pd.isnull(DNA_counts1_T0)]
+    DNA_counts2_T0 = DNA_counts2_T0[~pd.isnull(DNA_counts2_T0)]
+    DNA_counts1_T4 = DNA_counts1_T4[~pd.isnull(DNA_counts1_T4)]
+    DNA_counts2_T4 = DNA_counts2_T4[~pd.isnull(DNA_counts2_T4)]
+    sequence_indicators1_T0 = sequence_indicators1_T0[~pd.isnull(sequence_indicators1_T0)]
+    sequence_indicators1_T4 = sequence_indicators1_T4[~pd.isnull(sequence_indicators1_T4)]
+    sequence_indicators2_T0 = sequence_indicators2_T0[~pd.isnull(sequence_indicators2_T0)]    
+    sequence_indicators2_T4 = sequence_indicators2_T4[~pd.isnull(sequence_indicators2_T4)]    
+
+    if len(RNA_counts1_T0)!=len(DNA_counts1_T0):
+        raise Exception('RNA_counts and DNA_counts must be array-like of the same length')
+    if len(RNA_counts1_T4)!=len(DNA_counts1_T4):
+        raise Exception('RNA_counts and DNA_counts must be array-like of the same length')
+    if len(RNA_counts2_T0)!=len(DNA_counts2_T0):
+        raise Exception('RNA_counts and DNA_counts must be array-like of the same length')        
+    if len(RNA_counts2_T4)!=len(DNA_counts2_T4):
+        raise Exception('RNA_counts and DNA_counts must be array-like of the same length')        
+    if len(sequence_indicators1_T0)!=len(RNA_counts1_T0):
+        raise Exception('sequence_indicators must be array-like of the same length as the counts')
+    if len(sequence_indicators1_T4)!=len(RNA_counts1_T4):
+        raise Exception('sequence_indicators must be array-like of the same length as the counts')
+    if len(sequence_indicators2_T0)!=len(RNA_counts2_T0):
+        raise Exception('sequence_indicators must be array-like of the same length as the counts')
+    if len(sequence_indicators2_T4)!=len(RNA_counts2_T4):
+        raise Exception('sequence_indicators must be array-like of the same length as the counts')
+
+    
+    jackknife_variance_list = []
+    RD_list = []
+    
+    if set(sequence_indicators1_T0)!=set(sequence_indicators2_T0):
+        raise Exception('Sequence indicators must be paired in MPRAudit Paired')
+    if set(sequence_indicators1_T4)!=set(sequence_indicators2_T4):
+        raise Exception('Sequence indicators must be paired in MPRAudit Paired')
+    if set(sequence_indicators1_T0)!=set(sequence_indicators2_T4):
+        raise Exception('Sequence indicators must be paired in MPRAudit Paired')
+    
+        
+    for sequence in np.unique(sequence_indicators1_T0):
+        RNA_sequence_counts1_T0 = RNA_counts1_T0[sequence_indicators1_T0==sequence]
+        DNA_sequence_counts1_T0 = DNA_counts1_T0[sequence_indicators1_T0==sequence]    
+        RNA_sequence_counts1_T4 = RNA_counts1_T4[sequence_indicators1_T4==sequence]
+        DNA_sequence_counts1_T4 = DNA_counts1_T4[sequence_indicators1_T4==sequence]    
+        RNA_sequence_counts2_T0 = RNA_counts2_T0[sequence_indicators2_T0==sequence]
+        DNA_sequence_counts2_T0 = DNA_counts2_T0[sequence_indicators2_T0==sequence]    
+        RNA_sequence_counts2_T4 = RNA_counts2_T4[sequence_indicators2_T4==sequence]
+        DNA_sequence_counts2_T4 = DNA_counts2_T4[sequence_indicators2_T4==sequence]    
+        jackknife_variance_list.append(deleteDjackknife_variance_T4T0(RNA_sequence_counts1_T0, DNA_sequence_counts1_T0,RNA_sequence_counts1_T4, DNA_sequence_counts1_T4, numtrials,jackpow,ratiofunction)+deleteDjackknife_variance_T4T0(RNA_sequence_counts2_T0, DNA_sequence_counts2_T0, RNA_sequence_counts2_T4, DNA_sequence_counts2_T4, numtrials,jackpow,ratiofunction))
+        RD_list.append(ratio_function(array1 = RNA_sequence_counts1_T0, array2 = DNA_sequence_counts1_T0, array3 = RNA_sequence_counts1_T4, array4 = DNA_sequence_counts1_T4, flag_value = ratiofunction)-ratio_function(array1 = RNA_sequence_counts2_T0, array2 = DNA_sequence_counts2_T0, array3 = RNA_sequence_counts2_T4, array4 = DNA_sequence_counts2_T4, flag_value = ratiofunction))
+        
+    tech_variance = np.mean(jackknife_variance_list)
+    total_variance = np.var(RD_list)
+    delta_tech = ordinary_jackknife_variance(jackknife_variance_list)
+    delta_var = ordinary_variance_jackknife_variance(RD_list)
+    b2_mean, b2_var = uncertainty(tech_variance,total_variance,delta_tech,delta_var)
+    return b2_mean, np.sqrt(b2_var)
+    
+    
+def MPRAudit_Groups_T4T0(RNA_counts_T0, DNA_counts_T0, RNA_counts_T4, DNA_counts_T4, sequence_indicators_T0, sequence_indicators_T4, numtrials=100, jackpow=3./5, ratiofunction=1, group_indicators_T0=None, group_indicators_T4=None): #sequence_indicator groups clones into otherwise identical sequences
+    if len(RNA_counts_T0)!=len(DNA_counts_T0):
+        raise Exception('RNA_counts and DNA_counts must be array-like of the same length')
+    if len(RNA_counts_T4)!=len(DNA_counts_T4):
+        raise Exception('RNA_counts and DNA_counts must be array-like of the same length')
+    if len(sequence_indicators_T0)!=len(RNA_counts_T0):
+        raise Exception('sequence_indicators must be array-like of the same length as the counts')
+    if len(sequence_indicators_T4)!=len(RNA_counts_T4):
+        raise Exception('sequence_indicators must be array-like of the same length as the counts')
+    if group_indicators_T0 is not None:
+        if len(group_indicators_T0)!=len(RNA_counts_T0):
+            raise Exception('sequence_indicators must be array-like of the same length as the counts')    
+    else:
+        group_indicators_T0 = np.ones(len(RNA_counts_T0))
+    if group_indicators_T4 is not None:
+        if len(group_indicators_T4)!=len(RNA_counts_T4):
+            raise Exception('sequence_indicators must be array-like of the same length as the counts')    
+    else: #If no group indicators then no groups -- just make them all one.
+        group_indicators_T4 = np.ones(len(RNA_counts_T4))
+    RNA_counts_T0 = np.array(RNA_counts_T0)
+    DNA_counts_T0 = np.array(DNA_counts_T0)
+    RNA_counts_T4 = np.array(RNA_counts_T4)
+    DNA_counts_T4 = np.array(DNA_counts_T4)
+    sequence_indicators_T0 = np.array(sequence_indicators_T0)
+    sequence_indicators_T4 = np.array(sequence_indicators_T4)
+    group_indicators_T0 = np.array(group_indicators_T0)
+    group_indicators_T4 = np.array(group_indicators_T4)
+    
+    tech_variance = 0
+    total_variance = 0
+    group_ordered_list = []
+    
+    for group in np.unique(group_indicators_T0):
+        jackknife_variance_list = []
+        RD_list = []
+        for sequence in np.unique(sequence_indicators_T0):
+            RNA_sequence_counts_T0 = RNA_counts_T0[(sequence_indicators_T0==sequence)&(group_indicators_T0==group)]
+            DNA_sequence_counts_T0 = DNA_counts_T0[(sequence_indicators_T0==sequence)&(group_indicators_T0==group)]
+            RNA_sequence_counts_T4 = RNA_counts_T4[(sequence_indicators_T4==sequence)&(group_indicators_T4==group)]
+            DNA_sequence_counts_T4 = DNA_counts_T4[(sequence_indicators_T4==sequence)&(group_indicators_T4==group)]
+            jackknife_variance_list.append(deleteDjackknife_variance_T4T0(RNA_sequence_counts_T0, DNA_sequence_counts_T0,RNA_sequence_counts_T4, DNA_sequence_counts_T4,numtrials,jackpow,ratiofunction))
+            RD_list.append(ratio_function(array1 = RNA_sequence_counts_T0, array2 = DNA_sequence_counts_T0, array3 = RNA_sequence_counts_T4, array4 = DNA_sequence_counts_T4,flag_value = ratiofunction))
+            if len(RD_list)>0:
+                group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
+        tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
+        total_variance += np.var(RD_list)*len(RD_list)
+
+    tech_variance = tech_variance/len(group_ordered_list) #Divide by total number of sequences
+    total_variance = total_variance/len(group_ordered_list)
+    delta_tech = ordinary_jackknife_variance_Ngroups(jackknife_variance_list,np.array(group_ordered_list))
+    delta_var = ordinary_variance_jackknife_variance_Ngroups(RD_list,np.array(group_ordered_list))
+
+    b2_mean, b2_var = uncertainty(tech_variance,total_variance,delta_tech,delta_var)
+    return b2_mean, np.sqrt(b2_var)
+    
     
 
 def MPRAudit_function(data_DF,ratiofunction=1,paired=False,timepoints=1,numtrials=100,jackpow=3./5):
@@ -347,6 +529,12 @@ def MPRAudit_function(data_DF,ratiofunction=1,paired=False,timepoints=1,numtrial
             if data_DF.shape[1]==6:
                 b2_mean,b2_std = MPRAudit_Pairs(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
             else:
-                raise Exception('Input file should have 5 columns for this set of parameters')
-
+                raise Exception('Input file should have 6 columns for this set of parameters')
+    elif timepoints==2:
+        if paired==False:
+            if data_DF.shape[1]==6: #RNA_T0, DNA_T0, RNA_T4, DNA_T4, sequence_indicators_T0, sequence_indicators_T4
+                b2_mean,b2_std = MPRAudit_Groups_T4T0(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
+            else:
+                raise Exception('Input file should have 6 columns for this set of parameters')
+                
     return b2_mean, b2_std    
