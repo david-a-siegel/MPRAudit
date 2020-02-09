@@ -5,7 +5,7 @@ import pandas as pd
 import MPRAudit_Functions
 from time import process_time
 
-def main():
+def main(): 
 
     starttime = process_time()
     #Let's make sets of pairs.  1 vs 2, where half of 2 is different from the other half.
@@ -57,8 +57,9 @@ def main():
     print("Total time = "+repr(process_time()-starttime))
     print("b2_mean = "+repr(b2_mean))
     print("b2_std = "+repr(b2_std))
-                            
+
 
 if __name__ == '__main__':
-     main()
+    main()
+        
 
