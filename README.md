@@ -32,7 +32,9 @@ C. Some MPRAs like our recent bioRxiv submission "Massively Prallel Analysis of 
 
 D. Some MPRAs such as our recent bioRxiv submission might be interested in pairs of reference and mutant sequence data (how much of the variation in the data is due to the mutations as opposed to technical variance?).
 
-E. Some assays like CRISPR screens return only one type of data, such as RNA counts.
+E. MPRAs can be at multiple time points and have pairs of reference and mutant sequences.
+
+F. Some assays like CRISPR screens return only one type of data, such as RNA counts.
 
 ## Preparing Data
 MPRAudit reads in data using pandas "read_csv" and assumes there is no header.  Note that counts do not need to be integer, they can be normalized or transformed.
@@ -89,7 +91,10 @@ In this case the final rows have missing data because the number of clones diffe
 6,6,,,2,
 
 
-E. Finally, for CRISPR screens and other assays where only RNA counts are obtained and no DNA counts, the input file should have 2 columns and you must use "-CRISPR_log_flag True/False" to tell MPRAudit whether to compare the raw values or log2(counts+1):
+E. For pairs of data at two time points, the file should have 12 columns: (1) RNA_counts1_T0, (2) DNA_counts1_T0, (3) RNA_counts1_T4, (4) DNA_counts1_T4, (5) RNA_counts2_T0, (6) DNA_counts2_T0, (7) RNA_counts2_T4, (8) DNA_counts2_T4, (9) sequence_indicators1_T0, (10) sequence_indicators1_T4, (11) sequence_indicators2_T0, (12) sequence_indicators2_T4
+
+
+F. Finally, for CRISPR screens and other assays where only RNA counts are obtained and no DNA counts, the input file should have 2 columns and you must use "-CRISPR_log_flag True/False" to tell MPRAudit whether to compare the raw values or log2(counts+1):
 
 (1) RNA_counts, (2) sequence_indicator
 
@@ -126,8 +131,8 @@ There are currently several choices of ratio functions.  For RNA and DNA data:
 
 For RNA and DNA data at two time points (T4 and T0 in our publication):
 
-11. T4/(T4+T0) where T0 = RNA/(RNA+DNA)|T0 and T4 = RNA/(RNA+DNA)|T4\
-12. T4/T0 where T0 = log2(RNA/DNA)|T0 and T4 = log2(RNA/DNA)|T4\
+11. T4/(T4+T0) where T0 = RNA/(RNA+DNA)|T0 and T4 = RNA/(RNA+DNA)|T4
+12. T4/T0 where T0 = log2(RNA/DNA)|T0 and T4 = log2(RNA/DNA)|T4
 13. T4/T0 where T0 = log2(RNA/DNA+1)|T0 and T4 = log2(RNA/DNA+1)|T4
 
 
@@ -148,7 +153,8 @@ On a 2014 Mac Mini,\
 Simulation1 returns 7 seconds, b2 ~ 0.51, SD ~ 0.03\
 Simulation2 returns 14 seconds, b2 ~ 0.88, SD ~ 0.01\
 Simulation3 returns 13 seconds, b2 ~ 0.35, SD ~ 0.04\
-Simulation4 returns 6 seconds, b2 ~ 0.53, SD ~ 0.03
+Simulation4 returns 6 seconds, b2 ~ 0.53, SD ~ 0.03\
+Simulation5 returns 28 seconds, b2 ~ 0.19, SD ~ 0.05
 
 
 ## Citation
