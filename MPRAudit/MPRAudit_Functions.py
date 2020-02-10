@@ -596,6 +596,11 @@ def MPRAudit_function(data_DF,ratiofunction=1,paired=False,timepoints=1,numtrial
                     b2_mean,b2_std = MPRAudit_Groups_T4T0(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
                 else:
                     raise Exception('Input file should have 6 columns for this set of parameters')
+            else:
+                if data_DF.shape[1]==12: #Twice as many as above...
+                    b2_mean,b2_std = MPRAudit_Pairs_T4T0(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],data_DF.iloc[:,6],data_DF.iloc[:,7],data_DF.iloc[:,8],data_DF.iloc[:,9],data_DF.iloc[:,10],data_DF.iloc[:,11],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
+                else:
+                    raise Exception('Input file should have 12 columns for this set of parameters')
     elif type(CRISPR_log_flag)==bool:
         b2_mean,b2_std = MPRAudit_CRISPR(data_DF.iloc[:,0],data_DF.iloc[:,1],numtrials=numtrials,jackpow=jackpow,logflag=CRISPR_log_flag) #No groups, just single sequences
     else:
