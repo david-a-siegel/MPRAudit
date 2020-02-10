@@ -131,8 +131,8 @@ There are currently several choices of ratio functions.  For RNA and DNA data:
 
 For RNA and DNA data at two time points (T4 and T0 in our publication):
 
-11. T4/(T4+T0) where T0 = RNA/(RNA+DNA)|T0 and T4 = RNA/(RNA+DNA)|T4\
-12. T4/T0 where T0 = log2(RNA/DNA)|T0 and T4 = log2(RNA/DNA)|T4\
+11. T4/(T4+T0) where T0 = RNA/(RNA+DNA)|T0 and T4 = RNA/(RNA+DNA)|T4
+12. T4/T0 where T0 = log2(RNA/DNA)|T0 and T4 = log2(RNA/DNA)|T4
 13. T4/T0 where T0 = log2(RNA/DNA+1)|T0 and T4 = log2(RNA/DNA+1)|T4
 
 
