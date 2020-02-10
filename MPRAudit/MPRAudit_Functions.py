@@ -296,11 +296,11 @@ def deleteDjackknife_variance_T4T0(RNA_counts_T0, DNA_counts_T0, RNA_counts_T4, 
 def deleteDjackknife_variance_CRISPR(RNA_counts,numtrials=100,jackpow=3./5,logflag=True):
     RNA_counts = np.array(RNA_counts)
 
-    d = int(len(RNA_counts)**(exp_pow))
+    d = int(len(RNA_counts)**(jackpow))
     d_kept = len(RNA_counts) - d #This is n-d
     
     x_i = []
-    for i in range(num_trials):
+    for i in range(numtrials):
         kept_clones = random.sample(range(len(RNA_counts)),d_kept)
         RNA_counts_i = RNA_counts[kept_clones]
         if logflag==True:
@@ -308,7 +308,7 @@ def deleteDjackknife_variance_CRISPR(RNA_counts,numtrials=100,jackpow=3./5,logfl
         else:
             x_i.append(sum(RNA_counts_i))
     x_i = np.array(x_i)
-    jack_var_x = float(d_kept)/d/num_trials*sum((x_i-np.mean(x_i))**2)
+    jack_var_x = float(d_kept)/d/numtrials*sum((x_i-np.mean(x_i))**2)
     return jack_var_x
 
 
@@ -596,7 +596,7 @@ def MPRAudit_function(data_DF,ratiofunction=1,paired=False,timepoints=1,numtrial
                     b2_mean,b2_std = MPRAudit_Groups_T4T0(data_DF.iloc[:,0],data_DF.iloc[:,1],data_DF.iloc[:,2],data_DF.iloc[:,3],data_DF.iloc[:,4],data_DF.iloc[:,5],numtrials=numtrials,jackpow=jackpow,ratiofunction=ratiofunction)
                 else:
                     raise Exception('Input file should have 6 columns for this set of parameters')
-    elif type(CRISPR_flag)==bool:
+    elif type(CRISPR_log_flag)==bool:
         b2_mean,b2_std = MPRAudit_CRISPR(data_DF.iloc[:,0],data_DF.iloc[:,1],numtrials=numtrials,jackpow=jackpow,logflag=CRISPR_log_flag) #No groups, just single sequences
     else:
         raise Exception('CRISPR_log_flag must be True or False')
