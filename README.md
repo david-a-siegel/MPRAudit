@@ -2,7 +2,7 @@
 Repository for MPRA analysis method "MPRAudit"
 
 ## Overview
-MPRAudit takes a CSV as input; it returns the fraction of variance explained by sequence variation, which we call b<sup>2</sup>, as well as its estimated uncertainty.  At its core MPRAudit consists of 5 functions:
+MPRAudit takes a CSV from a clonal assay as input; it returns the fraction of variance explained by sequence variation, which we call b<sup>2</sup>, as well as its estimated uncertainty.  At its core MPRAudit consists of 5 functions:
 
 Estimate b<sup>2</sup>:
 
