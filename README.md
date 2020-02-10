@@ -63,7 +63,7 @@ For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are 
 
 In this case, there are two sets of RNA and DNA data, with two sequences labelled 1 and 2 given in the 5th and 6th columns.  For the first set of RNA and DNA data, sequence 1 has 4 clones and sequence 2 has 4 clones (there are 4 1's and 4 2's in the 5th column).  For the second set of RNA and DNA data, sequence 1 has 3 clones and sequence 2 has 3 clones (there are 3 1's and 3 2's in the 6th column).
 
-We saved this small dataset as "ExampleData1.csv".  To run MPRAudit on this as paired RNA/(RNA+DNA) data, the command is
+We saved this small dataset as "ExampleData1.csv" in MPRAudit/Examples/.  To run MPRAudit on this as paired RNA/(RNA+DNA) data, the command is
 ```
 python MPRAudit.py -infile /path/to/ExampleData1.csv -paired True
 ```
