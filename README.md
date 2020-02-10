@@ -32,7 +32,9 @@ C. Some MPRAs like our recent bioRxiv submission "Massively Prallel Analysis of 
 
 D. Some MPRAs such as our recent bioRxiv submission might be interested in pairs of reference and mutant sequence data (how much of the variation in the data is due to the mutations as opposed to technical variance?).
 
-E. Some assays like CRISPR screens return only one type of data, such as RNA counts.
+E. MPRAs can be at multiple time points and have pairs of reference and mutant sequences.
+
+F. Some assays like CRISPR screens return only one type of data, such as RNA counts.
 
 ## Preparing Data
 MPRAudit reads in data using pandas "read_csv" and assumes there is no header.  Note that counts do not need to be integer, they can be normalized or transformed.
@@ -89,7 +91,10 @@ In this case the final rows have missing data because the number of clones diffe
 6,6,,,2,
 
 
-E. Finally, for CRISPR screens and other assays where only RNA counts are obtained and no DNA counts, the input file should have 2 columns and you must use "-CRISPR_log_flag True/False" to tell MPRAudit whether to compare the raw values or log2(counts+1):
+E. For pairs of data at two time points, the file should have 12 columns: (1) RNA_counts1_T0, (2) DNA_counts1_T0, (3) RNA_counts1_T4, (4) DNA_counts1_T4, (5) RNA_counts2_T0, (6) DNA_counts2_T0, (7) RNA_counts2_T4, (8) DNA_counts2_T4, (9) sequence_indicators1_T0, (10) sequence_indicators1_T4, (11) sequence_indicators2_T0, (12) sequence_indicators2_T4
+
+
+F. Finally, for CRISPR screens and other assays where only RNA counts are obtained and no DNA counts, the input file should have 2 columns and you must use "-CRISPR_log_flag True/False" to tell MPRAudit whether to compare the raw values or log2(counts+1):
 
 (1) RNA_counts, (2) sequence_indicator
 
