@@ -2,7 +2,7 @@
 Repository for MPRA analysis method "MPRAudit"
 
 ## Overview
-MPRAudit calculates the fraction of variance explained by sequence variation, which we call b<sup>2</sup>.  At its core MPRAudit consists of 5 functions to produce and return b<sup>2</sup>:
+MPRAudit takes a CSV as input; it returns the fraction of variance explained by sequence variation, which we call b<sup>2</sup>, as well as its estimated uncertainty, the estimated standard deviation of b<sup>2</sup>.  At its core MPRAudit consists of 5 functions:
 
 Estimate b<sup>2</sup>:
 
@@ -20,25 +20,36 @@ Then (5) combine the above results to return b<sup>2</sup> and SD(b<sup>2</sup>)
 
 There are minor variations depending on whether MPRAudit is being applied to the variation of individual sequences, pairs of sequences, or groups of sequences.
 
-We also provide code to generate sample data, example scripts, and the python notebook that generated the figures in our manuscript.
+We also provide code to generate sample data, example scripts, example data, and the python notebook that generated the figures in our manuscript.
 
+## Types of Data
+
+Some assays like CRISPR screens return only one type of data, such as RNA counts.
+
+MPRAs like Fast-UTR (Zhou et al, Nature Biotech 2014) return counts of RNA and DNA.
+
+Some MPRAs like our recent bioRxiv submission "Massively Prallel Analysis of Human 3' UTRs Reveals that AU-Rich Element Length and Registration Predict mRNA Destabilization" might measure counts of RNA and DNA at separate time points, and might be interested in a ratio of ratios, such as RNA/(RNA+DNA) evaluated at T4/(T4+T0).
+
+Some MPRAs such as our recent bioRxiv submission might be interested in pairs of reference and mutant sequence data (how much of the variation in the data is due to the mutations as opposed to technical variance?).
+
+Some MPRAs might be interested in the amount of variation remaining after groups of sequences are taken into account.
 
 ## Preparing Data
 MPRAudit reads in data using pandas "read_csv" and assumes there is no header.
 
-For individual sequences, the file should have 3 columns: 
+For standard MPRA data with RNA counts and DNA counts, the input file should have 3 columns: 
 
 (1) RNA_counts, (2) DNA_counts, (3) sequence_indicator
 
-For groups of individual sequences, the file should have 4 columns: 
+For calculating b<sup>2</sup> within groups of sequences, the file should have 4 columns: 
 
 (1) RNA_counts, (2) DNA_counts, (3) sequence_indicator, (4) group_indicator
 
-For pairs of sequences, the file should have 6 columns: 
+For pairs of MPRA sequence data, the file should have 6 columns: 
 
 (1) RNA_counts1, (2) DNA_counts1, (3) RNA_counts2, (4) DNA_counts2, (5) sequence_indicator1, (6) sequence_indicator2
 
-Counts can be normalized (not necessarily integer).
+Note that counts do not need to be integer, they can be normalized or transformed.
 
 For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:\
 6,7,6,7,1,1\
@@ -52,11 +63,11 @@ For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are 
 
 In this case, there are two sets of RNA and DNA data, with two sequences labelled 1 and 2 given in the 5th and 6th columns.  For the first set of RNA and DNA data, sequence 1 has 4 clones and sequence 2 has 4 clones (there are 4 1's and 4 2's in the 5th column).  For the second set of RNA and DNA data, sequence 1 has 3 clones and sequence 2 has 3 clones (there are 3 1's and 3 2's in the 6th column).
 
-We saved this small dataset as "ExampleData1.csv".  To run MPRAudit on this as paired RNA/(RNA+DNA) data, the command is
+We saved this small dataset as "ExampleData1.csv" in MPRAudit/Examples/.  To run MPRAudit on this as paired RNA/(RNA+DNA) data, the command is
 ```
 python MPRAudit.py -infile /path/to/ExampleData1.csv -paired True
 ```
-and the output is roughly (results vary due to randomization):
+and the output is roughly (results vary due to randomization; use -numtrials for more precise values):
 ```
 b2_mean: 0.83
 b2_std: 0.07
@@ -76,37 +87,47 @@ In this case the final rows have missing data because the number of clones diffe
 6,6,,,2,
 
 
+Finally, for CRISPR screens and other assays where only RNA counts are obtained and no DNA counts, the input file should have 2 columns (and you must use -CRISPR_log_flag, either True or False to tell MPRAudit whether to compare the raw counts or log counts):
 
+(1) RNA_counts, (2) sequence_indicator
 
 By default, MPRAudit assumes the files are CSVs (comma-separated), but other delimiters can be used by passing the -sep flag.  We don't recommend using white space (tabs/spaces) because columns may be of unequal length and it might be beneficial to be able to observe missing data.
 
 ## Code
 MPRAudit uses basic functionality from common python packages: pandas, numpy, and scipy.
 
-MPRAudit functions are given in MPRAudit/MPRAudit_Functions.py
+MPRAudit functions are given in MPRAudit/MPRAudit_Functions.py.  To make sure MPRAudit runs properly, make sure MPRAudit_Functions.py and MPRAudit.py are in the same folder.
 
 MPRAudit can be run as:
 
 ```
-python MPRAudit.py -infile [input file] -outfile [output file] -ratio [ratio function indicator] -paired [True/False] -sep [delimiter] -timepoints [1 or 2] -numtrials [integer] -jackpow [float between 0 and 1]
+python MPRAudit.py -infile [input file] -outfile [output file] -ratio [ratio function indicator] -paired [True/False] -sep [delimiter] -timepoints [1 or 2] -numtrials [integer] -jackpow [float between 0 and 1] -CRISPR_log_flag [True/False]
 ```
 
 * -infile requires the input file (and path if appropriate)
 * -outfile gives MPRAudit an output filename (it prints to standard output by default)
-* -ratio uses RNA/(RNA+DNA) by default, must be an integer, currently 1-5 (see below for further details)
-* -paired is False by default
-* -sep is comma "," by default
-* -timepoints is 1 by default
-* -numtrials is 100 by default
-* -jackpow is 0.6 by default
+* -ratio uses RNA/(RNA+DNA) by default, must be an integer, currently 1-5 for paired RNA/DNA data, 11-13 for two time points (see below for further details)
+* -paired is False by default, whether or not paired differences between sequences are being examined
+* -sep is comma "," by default, the text delimiter in the input file (commas in CSVs, "\t" in tab-delimited files, etc)
+* -timepoints is 1 by default, option for 2 exists
+* -numtrials is 100 by default, more gives better output accuracy
+* -jackpow is 0.6 by default, tells the delete-D jackknife how many sequences to hold out
+* -CRISPR_log_flag is None by default, and should only be used if only one type of data is being analyzed (like RNA data in a CRISPR screen as opposed to RNA/DNA data in an MPRA)
 
 ### Ratio Functions
-There are currently five ratio functions:
+There are currently several choices of ratio functions.  For RNA and DNA data:
 1. RNA/(RNA+DNA)
 2. log2(RNA/DNA)
 3. log2((RNA+1)/(DNA+1))
 4. RNA/DNA
 5. (RNA+1)/(DNA+1)
+
+For RNA and DNA data at two time points (T4 and T0 in our publication):
+
+11. T4/(T4+T0) where T0 = RNA/(RNA+DNA)|T0 and T4 = RNA/(RNA+DNA)|T4\
+12. T4/T0 where T0 = log2(RNA/DNA)|T0 and T4 = log2(RNA/DNA)|T4\
+13. T4/T0 where T0 = log2(RNA/DNA+1)|T0 and T4 = log2(RNA/DNA+1)|T4
+
 
 Feel free to implement your own by editing "ratio_function" in MPRAudit_Functions and/or contact us with suggestions!
 
@@ -122,13 +143,16 @@ python Example_Simulation#.py
 On a 2014 Mac Mini,\
 Simulation1 returns 7 seconds, b2 ~ 0.51, SD ~ 0.03\
 Simulation2 returns 14 seconds, b2 ~ 0.88, SD ~ 0.01\
-Simulation3 returns 13 seconds, b2 ~ 0.35, SD ~ 0.04
+Simulation3 returns 13 seconds, b2 ~ 0.35, SD ~ 0.04\
+Simulation4 returns 6 seconds, b2 ~ 0.53, SD ~ 0.03
+
+The idea here is simply to simulate some data and run MPRAudit without creating a CSV file.
 
 ## Citation
 David A. Siegel, Olivier Le Tonqueze, Anne Biton, David J. Erle, and Noah Zaitlen, "MPRAudit Quantifies the Fraction of Variance Described by Unknown Features in Massively Parallel Reporter Assays" (2020).
 
 ## Contact
-David [dot] Siegel [at] ucsf [d0t] edu, please put "MPRAudit" in the subject line
+David [dot] Siegel [at] ucsf [d0t] edu, please put "MPRAudit" in the subject line.  This is a work in progress.
 
 ## Thanks
 DAS would like to thank Christa Caggiano for help with this Github
