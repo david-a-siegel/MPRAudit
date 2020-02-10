@@ -134,9 +134,11 @@ For RNA and DNA data at two time points (T4 and T0 in our publication):
 Feel free to implement your own and/or contact us with suggestions!
 
 
-### Example Simulations
+### Additional Example Simulations
 
-Example simulations can be run as
+We provided a small CSV as discussed above to test the basic function of MPRAudit on paired data with a CSV input.
+
+To test MPRAudit without creating a CSV file, some additional example simulations can be run as
 
 ```
 python Example_Simulation#.py
@@ -148,7 +150,6 @@ Simulation2 returns 14 seconds, b2 ~ 0.88, SD ~ 0.01\
 Simulation3 returns 13 seconds, b2 ~ 0.35, SD ~ 0.04\
 Simulation4 returns 6 seconds, b2 ~ 0.53, SD ~ 0.03
 
-The idea here is simply to simulate some data and run MPRAudit without creating a CSV file.
 
 ## Citation
 David A. Siegel, Olivier Le Tonqueze, Anne Biton, David J. Erle, and Noah Zaitlen, "MPRAudit Quantifies the Fraction of Variance Described by Unknown Features in Massively Parallel Reporter Assays" (2020).
