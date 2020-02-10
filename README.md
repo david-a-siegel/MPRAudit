@@ -96,7 +96,7 @@ By default, MPRAudit assumes the files are CSVs (comma-separated), but other del
 ## Code
 MPRAudit uses basic functionality from common python packages: pandas, numpy, and scipy.
 
-MPRAudit functions are given in MPRAudit/MPRAudit_Functions.py
+MPRAudit functions are given in MPRAudit/MPRAudit_Functions.py.  To make sure MPRAudit runs properly, make sure MPRAudit_Functions.py and MPRAudit.py are in the same folder.
 
 MPRAudit can be run as:
 
