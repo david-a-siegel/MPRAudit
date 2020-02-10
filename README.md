@@ -24,34 +24,36 @@ We also provide code to generate sample data, example scripts, example data, and
 
 ## Types of Data
 
-Some assays like CRISPR screens return only one type of data, such as RNA counts.
+A. MPRAs like Fast-UTR (Zhou et al, Nature Biotech 2014) return counts of RNA and DNA.
 
-MPRAs like Fast-UTR (Zhou et al, Nature Biotech 2014) return counts of RNA and DNA.
+B. Some MPRAs might be interested in the amount of variation remaining after groups of sequences are taken into account.
 
-Some MPRAs like our recent bioRxiv submission "Massively Prallel Analysis of Human 3' UTRs Reveals that AU-Rich Element Length and Registration Predict mRNA Destabilization" might measure counts of RNA and DNA at separate time points, and might be interested in a ratio of ratios, such as RNA/(RNA+DNA) evaluated at T4/(T4+T0).
+C. Some MPRAs like our recent bioRxiv submission "Massively Prallel Analysis of Human 3' UTRs Reveals that AU-Rich Element Length and Registration Predict mRNA Destabilization" might measure counts of RNA and DNA at separate time points, and might be interested in a ratio of ratios, such as RNA/(RNA+DNA) evaluated at T4/(T4+T0).
 
-Some MPRAs such as our recent bioRxiv submission might be interested in pairs of reference and mutant sequence data (how much of the variation in the data is due to the mutations as opposed to technical variance?).
+D. Some MPRAs such as our recent bioRxiv submission might be interested in pairs of reference and mutant sequence data (how much of the variation in the data is due to the mutations as opposed to technical variance?).
 
-Some MPRAs might be interested in the amount of variation remaining after groups of sequences are taken into account.
+E. Some assays like CRISPR screens return only one type of data, such as RNA counts.
 
 ## Preparing Data
-MPRAudit reads in data using pandas "read_csv" and assumes there is no header.
+MPRAudit reads in data using pandas "read_csv" and assumes there is no header.  Note that counts do not need to be integer, they can be normalized or transformed.
 
-For standard MPRA data with RNA counts and DNA counts, the input file should have 3 columns: 
+A. For standard MPRA data with RNA counts and DNA counts, the input file should have 3 columns and no special flags are required: 
 
 (1) RNA_counts, (2) DNA_counts, (3) sequence_indicator
 
-For calculating b<sup>2</sup> within groups of sequences, the file should have 4 columns: 
+B. For calculating b<sup>2</sup> within groups of sequences, the file should have 4 columns and no special flags are required: 
 
 (1) RNA_counts, (2) DNA_counts, (3) sequence_indicator, (4) group_indicator
 
-For pairs of MPRA sequence data, the file should have 6 columns: 
+C. For MPRA data at two time points, the file should have 6 columns and "-timepoints 2" should be used:
+
+(1) RNA_counts_T0, (2) DNA_counts_T0, (3) RNA_counts_T4, (4) DNA_counts_T4, (5) sequence_indicator_T0, (6) sequence_indicator_T4
+
+D. For pairs of MPRA sequence data, the file should have 6 columns and "-paired True" should be used:
 
 (1) RNA_counts1, (2) DNA_counts1, (3) RNA_counts2, (4) DNA_counts2, (5) sequence_indicator1, (6) sequence_indicator2
 
-Note that counts do not need to be integer, they can be normalized or transformed.
-
-For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:\
+For pairs of sequences as in (C) or (D), "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:\
 6,7,6,7,1,1\
 2,3,6,8,1,1\
 6,7,6,5,1,1\
@@ -87,7 +89,7 @@ In this case the final rows have missing data because the number of clones diffe
 6,6,,,2,
 
 
-Finally, for CRISPR screens and other assays where only RNA counts are obtained and no DNA counts, the input file should have 2 columns (and you must use -CRISPR_log_flag, either True or False to tell MPRAudit whether to compare the raw counts or log counts):
+E. Finally, for CRISPR screens and other assays where only RNA counts are obtained and no DNA counts, the input file should have 2 columns and you must use "-CRISPR_log_flag True/False" to tell MPRAudit whether to compare the raw values or log2(counts+1):
 
 (1) RNA_counts, (2) sequence_indicator
 
@@ -101,7 +103,7 @@ MPRAudit functions are given in MPRAudit/MPRAudit_Functions.py.  To make sure MP
 MPRAudit can be run as:
 
 ```
-python MPRAudit.py -infile [input file] -outfile [output file] -ratio [ratio function indicator] -paired [True/False] -sep [delimiter] -timepoints [1 or 2] -numtrials [integer] -jackpow [float between 0 and 1] -CRISPR_log_flag [True/False]
+python MPRAudit.py -infile [input file] -outfile [standard out] -ratio [1] -paired [False] -sep [","] -timepoints [1] -numtrials [100] -jackpow [0.6] -CRISPR_log_flag [None]
 ```
 
 * -infile requires the input file (and path if appropriate)
@@ -111,7 +113,7 @@ python MPRAudit.py -infile [input file] -outfile [output file] -ratio [ratio fun
 * -sep is comma "," by default, the text delimiter in the input file (commas in CSVs, "\t" in tab-delimited files, etc)
 * -timepoints is 1 by default, option for 2 exists
 * -numtrials is 100 by default, more gives better output accuracy
-* -jackpow is 0.6 by default, tells the delete-D jackknife how many sequences to hold out
+* -jackpow is a value between 0 and 1 and tells the delete-D jackknife what proportion of sequences to hold out
 * -CRISPR_log_flag is None by default, and should only be used if only one type of data is being analyzed (like RNA data in a CRISPR screen as opposed to RNA/DNA data in an MPRA)
 
 ### Ratio Functions
@@ -129,7 +131,7 @@ For RNA and DNA data at two time points (T4 and T0 in our publication):
 13. T4/T0 where T0 = log2(RNA/DNA+1)|T0 and T4 = log2(RNA/DNA+1)|T4
 
 
-Feel free to implement your own by editing "ratio_function" in MPRAudit_Functions and/or contact us with suggestions!
+Feel free to implement your own and/or contact us with suggestions!
 
 
 ### Example Simulations
