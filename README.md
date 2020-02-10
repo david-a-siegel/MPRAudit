@@ -26,19 +26,19 @@ We also provide code to generate sample data, example scripts, and the python no
 ## Preparing Data
 MPRAudit reads in data using pandas "read_csv" and assumes there is no header.
 
-For individual sequences, the file should have 3 columns: 
+For standard MPRA data with RNA counts and DNA counts, the input file should have 3 columns: 
 
 (1) RNA_counts, (2) DNA_counts, (3) sequence_indicator
 
-For groups of individual sequences, the file should have 4 columns: 
+For calculating b<sup>2</sup> within groups of sequences, the file should have 4 columns: 
 
 (1) RNA_counts, (2) DNA_counts, (3) sequence_indicator, (4) group_indicator
 
-For pairs of sequences, the file should have 6 columns: 
+For pairs of MPRA sequence data, the file should have 6 columns: 
 
 (1) RNA_counts1, (2) DNA_counts1, (3) RNA_counts2, (4) DNA_counts2, (5) sequence_indicator1, (6) sequence_indicator2
 
-Counts can be normalized (not necessarily integer).
+Counts do not need to be integer, they can be normalized or transformed.
 
 For pairs of sequences, "sequence_indicator" tells MPRAudit which sequences are paired, and they may have different numbers of clones.  For instance, there might be two pairs of sequences with different numbers of clones, and the data file might look like:\
 6,7,6,7,1,1\
@@ -56,7 +56,7 @@ We saved this small dataset as "ExampleData1.csv".  To run MPRAudit on this as p
 ```
 python MPRAudit.py -infile /path/to/ExampleData1.csv -paired True
 ```
-and the output is roughly (results vary due to randomization):
+and the output is roughly (results vary due to randomization; use -numtrials for more precise values):
 ```
 b2_mean: 0.83
 b2_std: 0.07
@@ -76,7 +76,9 @@ In this case the final rows have missing data because the number of clones diffe
 6,6,,,2,
 
 
+Finally, for CRISPR screens and other assays where only RNA counts are obtained and no DNA counts, the input file should have 2 columns (and you must use -CRISPR_log_flag, either True or False to tell MPRAudit whether to compare the raw counts or log counts):
 
+(1) RNA_counts, (2) sequence_indicator
 
 By default, MPRAudit assumes the files are CSVs (comma-separated), but other delimiters can be used by passing the -sep flag.  We don't recommend using white space (tabs/spaces) because columns may be of unequal length and it might be beneficial to be able to observe missing data.
 
@@ -99,14 +101,21 @@ python MPRAudit.py -infile [input file] -outfile [output file] -ratio [ratio fun
 * -timepoints is 1 by default
 * -numtrials is 100 by default
 * -jackpow is 0.6 by default
+* -CRISPR_log_flag is None by default, and should only be used if only one type of data is being analyzed (like RNA data in a CRISPR screen)
 
 ### Ratio Functions
-There are currently five ratio functions:
+There are currently several choices of ratio functions.  For RNA and DNA data:
 1. RNA/(RNA+DNA)
 2. log2(RNA/DNA)
 3. log2((RNA+1)/(DNA+1))
 4. RNA/DNA
 5. (RNA+1)/(DNA+1)
+
+For RNA and DNA data at two time points (T4 and T0 in our publication):
+11. T4/(T4+T0) where T0 = RNA/(RNA+DNA)|T0 and T4 = RNA/(RNA+DNA)|T4
+12. T4/T0 where T0 = log2(RNA/DNA)|T0 and T4 = log2(RNA/DNA)|T4
+13. T4/T0 where T0 = log2(RNA/DNA+1)|T0 and T4 = log2(RNA/DNA+1)|T4
+
 
 Feel free to implement your own by editing "ratio_function" in MPRAudit_Functions and/or contact us with suggestions!
 
