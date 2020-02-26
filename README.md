@@ -166,7 +166,7 @@ Simulation1 returns 7 seconds, b2 ~ 0.51, SD ~ 0.03\
 Simulation2 returns 14 seconds, b2 ~ 0.88, SD ~ 0.01\
 Simulation3 returns 13 seconds, b2 ~ 0.35, SD ~ 0.04\
 Simulation4 returns 6 seconds, b2 ~ 0.53, SD ~ 0.03\
-Simulation5 returns 28 seconds, b2 ~ 0.19, SD ~ 0.05
+Simulation5 returns 28 seconds, b2 ~ 0.19, SD ~ 0.05 (although this one varies a lot from trial to trial)
 
 
 ## Citation
