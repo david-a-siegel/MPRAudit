@@ -209,11 +209,12 @@ def ordinary_jackknife_variance_Ngroups(list_of_values,group_indicators):
     
     x_i = []
     for group in np.unique(group_indicators):
-        group_values = list_of_values[group_indicators==group]
-        notgroup_values = list_of_values[group_indicators!=group]
-        for i in range(len(group_values)):
-            group_values_i = np.append(group_values[:i],group_values[i+1:])
-            x_i.append(np.mean(np.append(group_values_i,notgroup_values)))
+        if not pd.isnull(group):
+            group_values = list_of_values[group_indicators==group]
+            notgroup_values = list_of_values[group_indicators!=group]
+            for i in range(len(group_values)):
+                group_values_i = np.append(group_values[:i],group_values[i+1:])
+                x_i.append(np.mean(np.append(group_values_i,notgroup_values)))
     
     x_i = np.array(x_i)
     jack_var_x = float(N-1)/N*sum((x_i-np.mean(x_i))**2)
@@ -227,16 +228,18 @@ def ordinary_variance_jackknife_variance_Ngroups(list_of_values,group_indicators
 
     x_i = []
     for group in np.unique(group_indicators):
-        group_values = list_of_values[group_indicators==group]
-        for i in range(len(group_values)):
-            group_values_i = np.append(group_values[:i],group_values[i+1:])
-            running_sum = 0.
-            for group_prime in np.unique(group_indicators):
-                if group_prime == group:
-                    running_sum += len(group_values_i)*np.var(group_values_i)
-                else:
-                    running_sum += len(list_of_values[group_indicators==group_prime])*np.var(list_of_values[group_indicators==group_prime])
-            x_i.append(running_sum/(N-1))
+        if not pd.isnull(group):
+            group_values = list_of_values[group_indicators==group]
+            for i in range(len(group_values)):
+                group_values_i = np.append(group_values[:i],group_values[i+1:])
+                running_sum = 0.
+                for group_prime in np.unique(group_indicators):
+                    if not pd.isnull(group_prime):
+                        if group_prime == group:
+                            running_sum += len(group_values_i)*np.var(group_values_i)
+                        else:
+                            running_sum += len(list_of_values[group_indicators==group_prime])*np.var(list_of_values[group_indicators==group_prime])
+                x_i.append(running_sum/(N-1))
         
     
     x_i = np.array(x_i)
@@ -331,19 +334,21 @@ def MPRAudit_CRISPR(RNA_counts, sequence_indicators, numtrials=100, jackpow=3./5
     group_ordered_list = []
     
     for group in np.unique(group_indicators):
-        jackknife_variance_list = []
-        RD_list = []
-        for sequence in np.unique(sequence_indicators):
-            RNA_sequence_counts = RNA_counts[(sequence_indicators==sequence)&(group_indicators==group)]
-            jackknife_variance_list.append(deleteDjackknife_variance_CRISPR(RNA_sequence_counts,numtrials,jackpow,logflag))
-            if logflag==True:
-                RD_list.append(np.log2(sum(RNA_sequence_counts+1)))
-            else:
-                RD_list.append(sum(RNA_sequence_counts))
-            if len(RD_list)>0:
-                group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
-        tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
-        total_variance += np.var(RD_list)*len(RD_list)
+        if not pd.isnull(group):
+            jackknife_variance_list = []
+            RD_list = []
+            for sequence_indicator in np.unique(sequence_indicators):
+                if not pd.isnull(sequence_indicator):
+                    RNA_sequence_counts = RNA_counts[(sequence_indicators==sequence_indicator)&(group_indicators==group)]
+                    jackknife_variance_list.append(deleteDjackknife_variance_CRISPR(RNA_sequence_counts,numtrials,jackpow,logflag))
+                    if logflag==True:
+                        RD_list.append(np.log2(sum(RNA_sequence_counts+1)))
+                    else:
+                        RD_list.append(sum(RNA_sequence_counts))
+                    if len(RD_list)>0:
+                        group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
+            tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
+            total_variance += np.var(RD_list)*len(RD_list)
 
     tech_variance = tech_variance/len(group_ordered_list) #Divide by total number of sequences
     total_variance = total_variance/len(group_ordered_list)
@@ -382,16 +387,17 @@ def MPRAudit_Pairs(RNA_counts1, DNA_counts1, RNA_counts2, DNA_counts2, sequence_
     jackknife_variance_list = []
     RD_list = []
     
-    if set(sequence_indicators1)!=set(sequence_indicators2):
+    if set(sequence_indicators1[~pd.isnull(sequence_indicators1)])!=set(sequence_indicators2[~pd.isnull(sequence_indicators2)]):
         raise Exception('Sequence indicators must be paired in MPRAudit Paired')
         
-    for sequence in np.unique(sequence_indicators1):
-        RNA_sequence_counts1 = RNA_counts1[sequence_indicators1==sequence]
-        DNA_sequence_counts1 = DNA_counts1[sequence_indicators1==sequence]    
-        RNA_sequence_counts2 = RNA_counts2[sequence_indicators2==sequence]
-        DNA_sequence_counts2 = DNA_counts2[sequence_indicators2==sequence]    
-        jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts1, DNA_sequence_counts1,numtrials,jackpow,ratiofunction)+deleteDjackknife_variance_T0(RNA_sequence_counts2, DNA_sequence_counts2,numtrials,jackpow,ratiofunction))
-        RD_list.append(ratio_function(RNA_sequence_counts1,DNA_sequence_counts1,flag_value = ratiofunction)-ratio_function(RNA_sequence_counts2,DNA_sequence_counts2,flag_value = ratiofunction))
+    for sequence_indicator in np.unique(sequence_indicators1):
+        if not pd.isnull(sequence_indicator):
+            RNA_sequence_counts1 = RNA_counts1[sequence_indicators1==sequence_indicator]
+            DNA_sequence_counts1 = DNA_counts1[sequence_indicators1==sequence_indicator]    
+            RNA_sequence_counts2 = RNA_counts2[sequence_indicators2==sequence_indicator]
+            DNA_sequence_counts2 = DNA_counts2[sequence_indicators2==sequence_indicator]    
+            jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts1, DNA_sequence_counts1,numtrials,jackpow,ratiofunction)+deleteDjackknife_variance_T0(RNA_sequence_counts2, DNA_sequence_counts2,numtrials,jackpow,ratiofunction))
+            RD_list.append(ratio_function(RNA_sequence_counts1,DNA_sequence_counts1,flag_value = ratiofunction)-ratio_function(RNA_sequence_counts2,DNA_sequence_counts2,flag_value = ratiofunction))
         
     tech_variance = np.mean(jackknife_variance_list)
     total_variance = np.var(RD_list)
@@ -421,17 +427,19 @@ def MPRAudit_Groups(RNA_counts, DNA_counts, sequence_indicators, numtrials=100, 
     group_ordered_list = []
     
     for group in np.unique(group_indicators):
-        jackknife_variance_list = []
-        RD_list = []
-        for sequence in np.unique(sequence_indicators):
-            RNA_sequence_counts = RNA_counts[(sequence_indicators==sequence)&(group_indicators==group)]
-            DNA_sequence_counts = DNA_counts[(sequence_indicators==sequence)&(group_indicators==group)]
-            jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts, DNA_sequence_counts,numtrials,jackpow,ratiofunction))
-            RD_list.append(ratio_function(RNA_sequence_counts,DNA_sequence_counts,flag_value = ratiofunction))
-            if len(RD_list)>0:
-                group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
-        tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
-        total_variance += np.var(RD_list)*len(RD_list)
+        if not pd.isnull(group):
+            jackknife_variance_list = []
+            RD_list = []
+            for sequence_indicator in np.unique(sequence_indicators):
+                if not pd.isnull(sequence_indicator):
+                    RNA_sequence_counts = RNA_counts[(sequence_indicators==sequence_indicator)&(group_indicators==group)]
+                    DNA_sequence_counts = DNA_counts[(sequence_indicators==sequence_indicator)&(group_indicators==group)]
+                    jackknife_variance_list.append(deleteDjackknife_variance_T0(RNA_sequence_counts, DNA_sequence_counts,numtrials,jackpow,ratiofunction))
+                    RD_list.append(ratio_function(RNA_sequence_counts,DNA_sequence_counts,flag_value = ratiofunction))
+                    if len(RD_list)>0:
+                        group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
+            tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
+            total_variance += np.var(RD_list)*len(RD_list)
 
     tech_variance = tech_variance/len(group_ordered_list) #Divide by total number of sequences
     total_variance = total_variance/len(group_ordered_list)
@@ -490,25 +498,26 @@ def MPRAudit_Pairs_T4T0(RNA_counts1_T0, DNA_counts1_T0, RNA_counts1_T4, DNA_coun
     jackknife_variance_list = []
     RD_list = []
     
-    if set(sequence_indicators1_T0)!=set(sequence_indicators2_T0):
+    if set(sequence_indicators1_T0[~pd.isnull(sequence_indicators1_T0)])!=set(sequence_indicators2_T0[~pd.isnull(sequence_indicators2_T0)]):
         raise Exception('Sequence indicators must be paired in MPRAudit Paired')
-    if set(sequence_indicators1_T4)!=set(sequence_indicators2_T4):
+    if set(sequence_indicators1_T4[~pd.isnull(sequence_indicators1_T4)])!=set(sequence_indicators2_T4[~pd.isnull(sequence_indicators2_T4)]):
         raise Exception('Sequence indicators must be paired in MPRAudit Paired')
-    if set(sequence_indicators1_T0)!=set(sequence_indicators2_T4):
+    if set(sequence_indicators1_T0[~pd.isnull(sequence_indicators1_T0)])!=set(sequence_indicators2_T4[~pd.isnull(sequence_indicators2_T4)]):
         raise Exception('Sequence indicators must be paired in MPRAudit Paired')
     
         
-    for sequence in np.unique(sequence_indicators1_T0):
-        RNA_sequence_counts1_T0 = RNA_counts1_T0[sequence_indicators1_T0==sequence]
-        DNA_sequence_counts1_T0 = DNA_counts1_T0[sequence_indicators1_T0==sequence]    
-        RNA_sequence_counts1_T4 = RNA_counts1_T4[sequence_indicators1_T4==sequence]
-        DNA_sequence_counts1_T4 = DNA_counts1_T4[sequence_indicators1_T4==sequence]    
-        RNA_sequence_counts2_T0 = RNA_counts2_T0[sequence_indicators2_T0==sequence]
-        DNA_sequence_counts2_T0 = DNA_counts2_T0[sequence_indicators2_T0==sequence]    
-        RNA_sequence_counts2_T4 = RNA_counts2_T4[sequence_indicators2_T4==sequence]
-        DNA_sequence_counts2_T4 = DNA_counts2_T4[sequence_indicators2_T4==sequence]    
-        jackknife_variance_list.append(deleteDjackknife_variance_T4T0(RNA_sequence_counts1_T0, DNA_sequence_counts1_T0,RNA_sequence_counts1_T4, DNA_sequence_counts1_T4, numtrials,jackpow,ratiofunction)+deleteDjackknife_variance_T4T0(RNA_sequence_counts2_T0, DNA_sequence_counts2_T0, RNA_sequence_counts2_T4, DNA_sequence_counts2_T4, numtrials,jackpow,ratiofunction))
-        RD_list.append(ratio_function(array1 = RNA_sequence_counts1_T0, array2 = DNA_sequence_counts1_T0, array3 = RNA_sequence_counts1_T4, array4 = DNA_sequence_counts1_T4, flag_value = ratiofunction)-ratio_function(array1 = RNA_sequence_counts2_T0, array2 = DNA_sequence_counts2_T0, array3 = RNA_sequence_counts2_T4, array4 = DNA_sequence_counts2_T4, flag_value = ratiofunction))
+    for sequence_indicator in np.unique(sequence_indicators1_T0):
+        if not pd.isnull(sequence_indicator):
+            RNA_sequence_counts1_T0 = RNA_counts1_T0[sequence_indicators1_T0==sequence_indicator]
+            DNA_sequence_counts1_T0 = DNA_counts1_T0[sequence_indicators1_T0==sequence_indicator]    
+            RNA_sequence_counts1_T4 = RNA_counts1_T4[sequence_indicators1_T4==sequence_indicator]
+            DNA_sequence_counts1_T4 = DNA_counts1_T4[sequence_indicators1_T4==sequence_indicator]    
+            RNA_sequence_counts2_T0 = RNA_counts2_T0[sequence_indicators2_T0==sequence_indicator]
+            DNA_sequence_counts2_T0 = DNA_counts2_T0[sequence_indicators2_T0==sequence_indicator]    
+            RNA_sequence_counts2_T4 = RNA_counts2_T4[sequence_indicators2_T4==sequence_indicator]
+            DNA_sequence_counts2_T4 = DNA_counts2_T4[sequence_indicators2_T4==sequence_indicator]    
+            jackknife_variance_list.append(deleteDjackknife_variance_T4T0(RNA_sequence_counts1_T0, DNA_sequence_counts1_T0,RNA_sequence_counts1_T4, DNA_sequence_counts1_T4, numtrials,jackpow,ratiofunction)+deleteDjackknife_variance_T4T0(RNA_sequence_counts2_T0, DNA_sequence_counts2_T0, RNA_sequence_counts2_T4, DNA_sequence_counts2_T4, numtrials,jackpow,ratiofunction))
+            RD_list.append(ratio_function(array1 = RNA_sequence_counts1_T0, array2 = DNA_sequence_counts1_T0, array3 = RNA_sequence_counts1_T4, array4 = DNA_sequence_counts1_T4, flag_value = ratiofunction)-ratio_function(array1 = RNA_sequence_counts2_T0, array2 = DNA_sequence_counts2_T0, array3 = RNA_sequence_counts2_T4, array4 = DNA_sequence_counts2_T4, flag_value = ratiofunction))
         
     tech_variance = np.mean(jackknife_variance_list)
     total_variance = np.var(RD_list)
@@ -551,19 +560,21 @@ def MPRAudit_Groups_T4T0(RNA_counts_T0, DNA_counts_T0, RNA_counts_T4, DNA_counts
     group_ordered_list = []
     
     for group in np.unique(group_indicators_T0):
-        jackknife_variance_list = []
-        RD_list = []
-        for sequence in np.unique(sequence_indicators_T0):
-            RNA_sequence_counts_T0 = RNA_counts_T0[(sequence_indicators_T0==sequence)&(group_indicators_T0==group)]
-            DNA_sequence_counts_T0 = DNA_counts_T0[(sequence_indicators_T0==sequence)&(group_indicators_T0==group)]
-            RNA_sequence_counts_T4 = RNA_counts_T4[(sequence_indicators_T4==sequence)&(group_indicators_T4==group)]
-            DNA_sequence_counts_T4 = DNA_counts_T4[(sequence_indicators_T4==sequence)&(group_indicators_T4==group)]
-            jackknife_variance_list.append(deleteDjackknife_variance_T4T0(RNA_sequence_counts_T0, DNA_sequence_counts_T0,RNA_sequence_counts_T4, DNA_sequence_counts_T4,numtrials,jackpow,ratiofunction))
-            RD_list.append(ratio_function(array1 = RNA_sequence_counts_T0, array2 = DNA_sequence_counts_T0, array3 = RNA_sequence_counts_T4, array4 = DNA_sequence_counts_T4,flag_value = ratiofunction))
-            if len(RD_list)>0:
-                group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
-        tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
-        total_variance += np.var(RD_list)*len(RD_list)
+        if not pd.isnull(group):
+            jackknife_variance_list = []
+            RD_list = []
+            for sequence_indicator in np.unique(sequence_indicators_T0):
+                if not pd.isnull(sequence_indicator):
+                    RNA_sequence_counts_T0 = RNA_counts_T0[(sequence_indicators_T0==sequence_indicator)&(group_indicators_T0==group)]
+                    DNA_sequence_counts_T0 = DNA_counts_T0[(sequence_indicators_T0==sequence_indicator)&(group_indicators_T0==group)]
+                    RNA_sequence_counts_T4 = RNA_counts_T4[(sequence_indicators_T4==sequence_indicator)&(group_indicators_T4==group)]
+                    DNA_sequence_counts_T4 = DNA_counts_T4[(sequence_indicators_T4==sequence_indicator)&(group_indicators_T4==group)]
+                    jackknife_variance_list.append(deleteDjackknife_variance_T4T0(RNA_sequence_counts_T0, DNA_sequence_counts_T0,RNA_sequence_counts_T4, DNA_sequence_counts_T4,numtrials,jackpow,ratiofunction))
+                    RD_list.append(ratio_function(array1 = RNA_sequence_counts_T0, array2 = DNA_sequence_counts_T0, array3 = RNA_sequence_counts_T4, array4 = DNA_sequence_counts_T4,flag_value = ratiofunction))
+                    if len(RD_list)>0:
+                        group_ordered_list.append(group) #I need the group indicators in the right order for later, one for each sequence now instead of one for each clone
+            tech_variance += np.mean(jackknife_variance_list)*len(jackknife_variance_list)
+            total_variance += np.var(RD_list)*len(RD_list)
 
     tech_variance = tech_variance/len(group_ordered_list) #Divide by total number of sequences
     total_variance = total_variance/len(group_ordered_list)
