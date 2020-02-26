@@ -372,12 +372,12 @@ def MPRAudit_Pairs(RNA_counts1, DNA_counts1, RNA_counts2, DNA_counts2, sequence_
     DNA_counts2 = np.array(DNA_counts2)
     sequence_indicators1 = np.array(sequence_indicators1)
     sequence_indicators2 = np.array(sequence_indicators2)
-    RNA_counts1 = RNA_counts1[~pd.isnull(RNA_counts1)]
-    RNA_counts2 = RNA_counts2[~pd.isnull(RNA_counts2)]
-    DNA_counts1 = DNA_counts1[~pd.isnull(DNA_counts1)]
-    DNA_counts2 = DNA_counts2[~pd.isnull(DNA_counts2)]
-    sequence_indicators1 = sequence_indicators1[~pd.isnull(sequence_indicators1)]
-    sequence_indicators2 = sequence_indicators2[~pd.isnull(sequence_indicators2)]    
+#     RNA_counts1 = RNA_counts1[~pd.isnull(RNA_counts1)]
+#     RNA_counts2 = RNA_counts2[~pd.isnull(RNA_counts2)]
+#     DNA_counts1 = DNA_counts1[~pd.isnull(DNA_counts1)]
+#     DNA_counts2 = DNA_counts2[~pd.isnull(DNA_counts2)]
+#     sequence_indicators1 = sequence_indicators1[~pd.isnull(sequence_indicators1)]
+#     sequence_indicators2 = sequence_indicators2[~pd.isnull(sequence_indicators2)]    
     
     jackknife_variance_list = []
     RD_list = []
@@ -456,18 +456,18 @@ def MPRAudit_Pairs_T4T0(RNA_counts1_T0, DNA_counts1_T0, RNA_counts1_T4, DNA_coun
     sequence_indicators1_T4 = np.array(sequence_indicators1_T4)
     sequence_indicators2_T0 = np.array(sequence_indicators2_T0)
     sequence_indicators2_T4 = np.array(sequence_indicators2_T4)
-    RNA_counts1_T0 = RNA_counts1_T0[~pd.isnull(RNA_counts1_T0)]
-    RNA_counts2_T0 = RNA_counts2_T0[~pd.isnull(RNA_counts2_T0)]
-    RNA_counts1_T4 = RNA_counts1_T4[~pd.isnull(RNA_counts1_T4)]
-    RNA_counts2_T4 = RNA_counts2_T4[~pd.isnull(RNA_counts2_T4)]
-    DNA_counts1_T0 = DNA_counts1_T0[~pd.isnull(DNA_counts1_T0)]
-    DNA_counts2_T0 = DNA_counts2_T0[~pd.isnull(DNA_counts2_T0)]
-    DNA_counts1_T4 = DNA_counts1_T4[~pd.isnull(DNA_counts1_T4)]
-    DNA_counts2_T4 = DNA_counts2_T4[~pd.isnull(DNA_counts2_T4)]
-    sequence_indicators1_T0 = sequence_indicators1_T0[~pd.isnull(sequence_indicators1_T0)]
-    sequence_indicators1_T4 = sequence_indicators1_T4[~pd.isnull(sequence_indicators1_T4)]
-    sequence_indicators2_T0 = sequence_indicators2_T0[~pd.isnull(sequence_indicators2_T0)]    
-    sequence_indicators2_T4 = sequence_indicators2_T4[~pd.isnull(sequence_indicators2_T4)]    
+#     RNA_counts1_T0 = RNA_counts1_T0[~pd.isnull(RNA_counts1_T0)]
+#     RNA_counts2_T0 = RNA_counts2_T0[~pd.isnull(RNA_counts2_T0)]
+#     RNA_counts1_T4 = RNA_counts1_T4[~pd.isnull(RNA_counts1_T4)]
+#     RNA_counts2_T4 = RNA_counts2_T4[~pd.isnull(RNA_counts2_T4)]
+#     DNA_counts1_T0 = DNA_counts1_T0[~pd.isnull(DNA_counts1_T0)]
+#     DNA_counts2_T0 = DNA_counts2_T0[~pd.isnull(DNA_counts2_T0)]
+#     DNA_counts1_T4 = DNA_counts1_T4[~pd.isnull(DNA_counts1_T4)]
+#     DNA_counts2_T4 = DNA_counts2_T4[~pd.isnull(DNA_counts2_T4)]
+#     sequence_indicators1_T0 = sequence_indicators1_T0[~pd.isnull(sequence_indicators1_T0)]
+#     sequence_indicators1_T4 = sequence_indicators1_T4[~pd.isnull(sequence_indicators1_T4)]
+#     sequence_indicators2_T0 = sequence_indicators2_T0[~pd.isnull(sequence_indicators2_T0)]    
+#     sequence_indicators2_T4 = sequence_indicators2_T4[~pd.isnull(sequence_indicators2_T4)]    
 
     if len(RNA_counts1_T0)!=len(DNA_counts1_T0):
         raise Exception('RNA_counts and DNA_counts must be array-like of the same length')
