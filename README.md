@@ -80,15 +80,27 @@ b2_std: 0.07
 The paired b<sup>2</sup> is large because the clones of sequence 1 are comparable in size for both pairs, but the fourth column is much larger than the third column for sequence 2 while the second column is smaller on average than the first column for sequence 2.
 
 
-In this case the final rows have missing data because the number of clones differ.  The extra commas must be present for the data to load properly.  But there should be NO missing data in the middle of the file, e.g. this will lead to errors and an exception might not be thrown:\
-6,7,6,7,1,1\
-2,3,6,8,1,1\
+In this case the final rows have missing data because the number of clones differ.  The extra commas must be present for the data to load properly (it loads as NAN).  Missing data is fine, but should be missing in the "sequence indicator" column, e.g. ExampleData2.csv given below will load properly and give similar results as ExampleData1.csv:\
+6,7,,,1,\
+2,3,,,1,\
 6,7,6,5,1,1\
-3,4,,,1,\
-6,7,6,10,2,2\
-16,10,6,15,2,2\
-7,7,6,10,2,2\
-6,6,,,2,
+3,4,6,10,1,2\
+6,7,6,15,2,2\
+16,10,6,10,2,2\
+7,7,6,7,2,1\
+6,6,6,7,2,1
+
+But including an extra indicator where there should be none because there is no data (on the first line, below) will lead to errors (for now it prints nan):\
+6,7,,,1,1\
+2,3,,,1,\
+6,7,6,5,1,1\
+3,4,6,10,1,2\
+6,7,6,15,2,2\
+16,10,6,10,2,2\
+7,7,6,7,2,1\
+6,6,6,7,2,1
+
+
 
 
 E. For pairs of data at two time points, the file should have 12 columns: (1) RNA_counts1_T0, (2) DNA_counts1_T0, (3) RNA_counts1_T4, (4) DNA_counts1_T4, (5) RNA_counts2_T0, (6) DNA_counts2_T0, (7) RNA_counts2_T4, (8) DNA_counts2_T4, (9) sequence_indicators1_T0, (10) sequence_indicators1_T4, (11) sequence_indicators2_T0, (12) sequence_indicators2_T4
